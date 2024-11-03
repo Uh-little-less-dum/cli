@@ -1,0 +1,12 @@
+Uh Little Less Dum was designed to build a community of developers, researchers, students and users of all types. On that note, the licensing rules are pretty simple...
+
+Copy, modify, fork, clone, star, and share whatever you want, but don't use it to build a direct competitor to Uh Little Less Dum or anything that is for-profit. This is not an attempt to generate revenue (there aren't even any revenue streams as of the time I'm writing this), but rather to consolidate as many plugins, tools, extensions and resources under one single architecture and build script.
+
+Ulld was built off of an existing application that was originally designed for a very different user base... just me. Because of that, there are some design decisions that aren't ideal when distributing a package for a wide range of users, particularly those with varied familiarity with the terminal and editing files directly. 
+
+If you have any re-design recommendations that won't fit in a simple pull request (please keep those guys as isolated as you can), get in contact with me directly and we can decide on a path forward together. This project was built for all of us, and I hope to reflect that in the way these design and architecture decisions are handled moving forward.
+
+
+Direct Competitor: Any tool intended to be used by students or academics, or in a classroom or lab-like setting.
+
+For Profit: Anything that requires a subscription, even if a free tier exists, an upfront cost, a paid license, or supports paid features. Also anything that generates revenue through any means other than voluntary user support (github sponsorship, donation links, 'sponsor this tool' links, etc).
