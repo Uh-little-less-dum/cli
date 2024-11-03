@@ -17,6 +17,6 @@ func (c *BuildConfigOpts) Init(cmd *cobra.Command, targetDir string) {
 		c.TargetDir = targetDir
 		c.InitialStage = constants.CloneTemplateAppStage
 	} else {
-		c.InitialStage = constants.PickTargetDirStage
+		c.InitialStage = constants.ConfirmCurrentDirStage
 	}
 }

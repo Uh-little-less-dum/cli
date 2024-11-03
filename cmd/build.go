@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"ulld/cli/internal/build"
 
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ var buildCmd = &cobra.Command{
 		env := build.UlldEnv{}
 		env.Init()
 		var dirPath string
-		if len(args) == 0 {
+		if len(args) == 1 {
 			dirPath = args[0]
 		}
 		build.BuildUlld(env, cmd, dirPath)

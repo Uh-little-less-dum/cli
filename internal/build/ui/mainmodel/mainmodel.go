@@ -8,7 +8,6 @@ import (
 	dirPicker "ulld/cli/internal/build/ui/dirpicker"
 
 	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -16,9 +15,8 @@ type mainModel struct {
 	stage           constants.BuildStage
 	help            help.Model
 	keys            keyMap.KeyMap
-	confirmDirModel tea.Model
-	targetDirModel  tea.Model
-	lastKey         string
+	confirmDirModel *confirmDir.ConfirmCurrentDirModel
+	targetDirModel  *dirPicker.DirPickerModel
 	targetDir       string
 	quitting        bool
 }
@@ -28,11 +26,12 @@ func (m mainModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// var cmd tea.Cmd
 	// var cmds []tea.Cmd
 
 	// switch msg := msg.(type) {
+	// FIX: Need to fix issue with these constants so that this switch statement works. Check the project from bashBunni when on wifi again.
 	switch msg.(type) {
 	case constants.ToRootModelMsg:
 		m.stage = constants.ConfirmCurrentDirStage
@@ -46,37 +45,50 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// 	tdModel, ok := newTargetDirModel.()
 	// }
 
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		// If we set a width on the help menu it can gracefully truncate
-		// its view as needed.
-		m.help.Width = msg.Width
+	// switch msg := msg.(type) {
+	// case tea.WindowSizeMsg:
+	// 	// If we set a width on the help menu it can gracefully truncate
+	// 	// its view as needed.
+	// 	m.help.Width = msg.Width
 
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.Up):
-			m.lastKey = "↑"
-		case key.Matches(msg, m.keys.Down):
-			m.lastKey = "↓"
-		case key.Matches(msg, m.keys.Left):
-			m.lastKey = "←"
-		case key.Matches(msg, m.keys.Right):
-			m.lastKey = "→"
-		case key.Matches(msg, m.keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
-		case key.Matches(msg, m.keys.Quit):
-			m.quitting = true
-			return m, tea.Quit
-		}
+	// case tea.KeyMsg:
+	// 	switch {
+	// 	case key.Matches(msg, m.keys.Up):
+	// 		m.lastKey = "↑"
+	// 	case key.Matches(msg, m.keys.Down):
+	// 		m.lastKey = "↓"
+	// 	case key.Matches(msg, m.keys.Left):
+	// 		m.lastKey = "←"
+	// 	case key.Matches(msg, m.keys.Right):
+	// 		m.lastKey = "→"
+	// 	case key.Matches(msg, m.keys.Help):
+	// 		m.help.ShowAll = !m.help.ShowAll
+	// 	case key.Matches(msg, m.keys.Quit):
+	// 		m.quitting = true
+	// 		return m, tea.Quit
+	// 	}
+	// }
+
+	switch m.stage {
+	case m.confirmDirModel.Stage:
+		return m.confirmDirModel.Update(msg)
+	case m.targetDirModel.Stage:
+		return m.targetDirModel.Update(msg)
 	}
 
 	return m.targetDirModel, nil
 }
 
-func (m mainModel) View() string {
+func (m *mainModel) View() string {
 	var s string
 	if m.quitting {
 		return "\n  No worries.\n\n"
+	}
+	switch m.stage {
+	case constants.ConfirmCurrentDirStage:
+		return m.confirmDirModel.View()
+	case constants.PickTargetDirStage:
+		return m.targetDirModel.View()
 	}
 	return s
 	// s = chosenView(m)
@@ -89,7 +101,7 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 		stage:           cfg.InitialStage,
 		help:            help.New(),
 		targetDirModel:  dirPicker.InitialDirPicker(),
-		confirmDirModel: confirmDir.InitialModel(),
+		confirmDirModel: confirmDir.InitialModel("Do you want to build ULLD in your current directory?", ""),
 		targetDir:       "",
 		quitting:        false,
 	}

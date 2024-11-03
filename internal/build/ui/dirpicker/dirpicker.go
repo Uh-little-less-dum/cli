@@ -5,14 +5,16 @@ import (
 	"os"
 	"strings"
 	"time"
+	"ulld/cli/internal/build/constants"
 	"ulld/cli/internal/utils/logger"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type model struct {
+type DirPickerModel struct {
 	filepicker   filepicker.Model
+	Stage        constants.BuildStage
 	selectedFile string
 	quitting     bool
 	err          error
@@ -26,15 +28,15 @@ func clearErrorAfter(t time.Duration) tea.Cmd {
 	})
 }
 
-func (m model) Init() tea.Cmd {
+func (m DirPickerModel) Init() tea.Cmd {
 	return m.filepicker.Init()
 }
 
-func (m model) GetValue() string {
+func (m DirPickerModel) GetValue() string {
 	return m.selectedFile
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m DirPickerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	didSelect, val := m.filepicker.DidSelectFile(msg)
 	if didSelect {
 		logger.DebugLog(val)
@@ -71,7 +73,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m DirPickerModel) View() string {
 	if m.quitting {
 		return ""
 	}
@@ -88,16 +90,17 @@ func (m model) View() string {
 	return s.String()
 }
 
-func InitialDirPicker() *model {
+func InitialDirPicker() *DirPickerModel {
 	fp := filepicker.New()
 	fp.DirAllowed = true
 	fp.FileAllowed = false
 	fp.AllowedTypes = []string{}
 	fp.AutoHeight = true
 	fp.CurrentDirectory, _ = os.UserHomeDir()
-	m := model{
+	m := DirPickerModel{
 		filepicker: fp,
 		err:        nil,
+		Stage:      constants.PickTargetDirStage,
 	}
 	return &m
 }
