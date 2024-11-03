@@ -1,6 +1,5 @@
 /*
 Copyright © 2024 Anderw Mueller <aiglinski414@gmail.com>
-
 */
 package cmd
 
@@ -9,8 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 )
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -23,7 +20,6 @@ This cli provides the primary ULLD build script and related commands, and will i
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 }
-
 
 // This should only be created in the rootCmd
 func Execute() {
@@ -38,11 +34,16 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli.yaml)")
+	var cfgFile string
+	var logFile string
+	// rootCmd
+
+	// NOT_IMPLEMENTED: Need to implement the entire config file handling.
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $ULLD_ADDITIONAL_SOURCES/cliConfig.json)")
+
+	rootCmd.PersistentFlags().StringVarP(&logFile, "logFile", "l", "", "Log output to this file. Useful for build failures and other debugging use cases.")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

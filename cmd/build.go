@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"errors"
 	"ulld/cli/internal/build"
+
+	"github.com/spf13/cobra"
 )
 
 // var (
@@ -13,11 +15,16 @@ var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build a new ULLD application.",
 	Long:  "Builds a new ULLD application based on local configuration files and environment variables.",
+	Args:  cobra.MaximumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		env := build.UlldEnv{}
 		env.Init()
-		build.BuildUlld(env)
+		var dirPath string
+		if len(args) == 0 {
+			dirPath = args[0]
+		}
+		build.BuildUlld(env, cmd, dirPath)
 	},
 }
 
