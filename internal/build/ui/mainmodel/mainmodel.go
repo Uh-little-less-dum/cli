@@ -100,6 +100,7 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 	val := mainModel{
 		stage:           cfg.InitialStage,
 		help:            help.New(),
+		keys:            keyMap.DefaultKeymap,
 		targetDirModel:  dirPicker.InitialDirPicker(),
 		confirmDirModel: confirmDir.InitialModel("Do you want to build ULLD in your current directory?", ""),
 		targetDir:       "",
