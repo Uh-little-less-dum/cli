@@ -51,6 +51,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	// TODO: Come back and add a description or subtitle showing the currently populated active directory if it exist.
+	// TODO: Come back and add a description or subtitle showing the currently populated active directory if we have that field and it's not empty.
 	return m.form.View()
 }

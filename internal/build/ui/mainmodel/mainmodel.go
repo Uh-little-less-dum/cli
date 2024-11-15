@@ -5,13 +5,16 @@ import (
 	"ulld/cli/internal/build/constants"
 	keyMap "ulld/cli/internal/build/keymap"
 	"ulld/cli/internal/build/ui/confirmdir"
-	dirPicker "ulld/cli/internal/build/ui/dirpicker"
+	"ulld/cli/internal/build/ui/filepicker"
 	"ulld/cli/internal/keymap"
 	"ulld/cli/internal/signals"
+	fs_utils "ulld/cli/internal/utils/fs"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/log"
+	"github.com/mitchellh/go-homedir"
 )
 
 type mainModel struct {
@@ -19,7 +22,7 @@ type mainModel struct {
 	help            help.Model
 	keys            keyMap.KeyMap
 	confirmDirModel confirmdir.Model
-	targetDirModel  *dirPicker.DirPickerModel
+	targetDirModel  filepicker.Model
 	targetDir       string
 	quitting        bool
 }
@@ -34,6 +37,11 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.targetDirModel, cmd = m.targetDirModel.Update(msg)
+		cmds = append(cmds, cmd)
+		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
+		cmds = append(cmds, cmd)
 	case signals.SetStageMsg:
 		m.stage = msg.NewStage
 	case signals.SetUseSelectedDirMsg:
@@ -47,17 +55,15 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keymap.Keymap.Quit):
 			m.quitting = true
 			return m, tea.Quit
-			// default:
-			// 	m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
 		}
 	}
-
 	switch m.stage {
 	case m.confirmDirModel.Stage:
 		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
 		cmds = append(cmds, cmd)
 	case m.targetDirModel.Stage:
-		return m.targetDirModel.Update(msg)
+		m.targetDirModel, cmd = m.targetDirModel.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	return m, tea.Batch(cmds...)
@@ -75,17 +81,18 @@ func (m mainModel) View() string {
 		return m.targetDirModel.View()
 	}
 	return s
-	// s = chosenView(m)
-	// return mainStyle.Render("\n" + s + "\n\n")
 }
 
 func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
-
+	homeDir, err := homedir.Dir()
+	if err != nil {
+		log.Fatal(err)
+	}
 	val := mainModel{
 		stage:           cfg.InitialStage,
 		help:            help.New(),
 		keys:            keyMap.DefaultKeymap,
-		targetDirModel:  dirPicker.InitialDirPicker(),
+		targetDirModel:  filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?"),
 		confirmDirModel: confirmdir.NewModel("Do you want to build ULLD in your current directory?"),
 		targetDir:       cfg.TargetDir,
 		quitting:        false,
