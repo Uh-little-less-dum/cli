@@ -4,10 +4,13 @@ import (
 	buildConfig "ulld/cli/internal/build/config"
 	"ulld/cli/internal/build/constants"
 	keyMap "ulld/cli/internal/build/keymap"
-	confirmDir "ulld/cli/internal/build/ui/confirmdir"
+	"ulld/cli/internal/build/ui/confirmdir"
 	dirPicker "ulld/cli/internal/build/ui/dirpicker"
+	"ulld/cli/internal/keymap"
+	"ulld/cli/internal/signals"
 
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -15,7 +18,7 @@ type mainModel struct {
 	stage           constants.BuildStage
 	help            help.Model
 	keys            keyMap.KeyMap
-	confirmDirModel *confirmDir.ConfirmCurrentDirModel
+	confirmDirModel confirmdir.Model
 	targetDirModel  *dirPicker.DirPickerModel
 	targetDir       string
 	quitting        bool
@@ -26,60 +29,41 @@ func (m mainModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// var cmd tea.Cmd
-	// var cmds []tea.Cmd
+func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
 
-	// switch msg := msg.(type) {
-	// FIX: Need to fix issue with these constants so that this switch statement works. Check the project from bashBunni when on wifi again.
-	switch msg.(type) {
-	case constants.ToRootModelMsg:
-		m.stage = constants.ConfirmCurrentDirStage
-	case constants.ConfirmDirectoryMsg:
-		m.stage = constants.CloneTemplateAppStage
+	switch msg := msg.(type) {
+	case signals.SetStageMsg:
+		m.stage = msg.NewStage
+	case signals.SetUseSelectedDirMsg:
+		if msg.UseSelectedDir {
+			m.stage = constants.CloneTemplateAppStage
+		} else {
+			m.stage = constants.PickTargetDirStage
+		}
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, keymap.Keymap.Quit):
+			m.quitting = true
+			return m, tea.Quit
+			// default:
+			// 	m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
+		}
 	}
-
-	// switch m.stage {
-	// case GetTargetDirStage:
-	// 	newTargetDirModel, newCmd := m.targetDirModel.Update(msg)
-	// 	tdModel, ok := newTargetDirModel.()
-	// }
-
-	// switch msg := msg.(type) {
-	// case tea.WindowSizeMsg:
-	// 	// If we set a width on the help menu it can gracefully truncate
-	// 	// its view as needed.
-	// 	m.help.Width = msg.Width
-
-	// case tea.KeyMsg:
-	// 	switch {
-	// 	case key.Matches(msg, m.keys.Up):
-	// 		m.lastKey = "↑"
-	// 	case key.Matches(msg, m.keys.Down):
-	// 		m.lastKey = "↓"
-	// 	case key.Matches(msg, m.keys.Left):
-	// 		m.lastKey = "←"
-	// 	case key.Matches(msg, m.keys.Right):
-	// 		m.lastKey = "→"
-	// 	case key.Matches(msg, m.keys.Help):
-	// 		m.help.ShowAll = !m.help.ShowAll
-	// 	case key.Matches(msg, m.keys.Quit):
-	// 		m.quitting = true
-	// 		return m, tea.Quit
-	// 	}
-	// }
 
 	switch m.stage {
 	case m.confirmDirModel.Stage:
-		return m.confirmDirModel.Update(msg)
+		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
+		cmds = append(cmds, cmd)
 	case m.targetDirModel.Stage:
 		return m.targetDirModel.Update(msg)
 	}
 
-	return m.targetDirModel, nil
+	return m, tea.Batch(cmds...)
 }
 
-func (m *mainModel) View() string {
+func (m mainModel) View() string {
 	var s string
 	if m.quitting {
 		return "\n  No worries.\n\n"
@@ -102,8 +86,8 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 		help:            help.New(),
 		keys:            keyMap.DefaultKeymap,
 		targetDirModel:  dirPicker.InitialDirPicker(),
-		confirmDirModel: confirmDir.InitialModel("Do you want to build ULLD in your current directory?", ""),
-		targetDir:       "",
+		confirmDirModel: confirmdir.NewModel("Do you want to build ULLD in your current directory?"),
+		targetDir:       cfg.TargetDir,
 		quitting:        false,
 	}
 

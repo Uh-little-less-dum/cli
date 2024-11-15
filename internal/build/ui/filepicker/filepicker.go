@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 	"time"
-	"ulld/cli/internal/utils/logger"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/log"
 )
 
 type model struct {
@@ -50,7 +50,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		logger.DebugLog(msg.String())
+		log.Debug(msg.String())
 		switch msg.String() {
 		case "ctrl+c", "q":
 			m.quitting = true

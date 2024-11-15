@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func BuildUlld(e UlldEnv, cmd *cobra.Command, dirPath string) {
+func BuildUlld(cmd *cobra.Command, dirPath string) {
 	var cfg buildConfig.BuildConfigOpts
 	cfg.Init(cmd, dirPath)
 	mm := mainBuildModel.InitialMainModel(&cfg)

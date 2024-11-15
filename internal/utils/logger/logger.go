@@ -1,64 +1,76 @@
 package logger
 
 import (
-	"errors"
-	"fmt"
-	"log"
-	"os"
-	"strings"
+	"time"
+	cli_styles "ulld/cli/internal/styles"
 
-	"github.com/spf13/cobra"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
+	"github.com/spf13/viper"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func DebugLog(val ...string) {
-	if len(os.Getenv("DEBUG")) <= 0 {
-		return
-	}
+func setLoggerStyles() {
+	styles := log.DefaultStyles()
+	styles.Levels[log.ErrorLevel] = lipgloss.NewStyle().
+		SetString("ERROR").
+		Padding(0, 1, 0, 1).
+		Background(lipgloss.Color("204")).
+		Foreground(lipgloss.Color("0"))
 
-	file_path := "/Users/bigsexy/Desktop/Go/projects/ulld/cli/debug.log"
+	styles.Levels[log.DebugLevel] = lipgloss.NewStyle().
+		SetString("DEBUG").
+		Padding(0, 1, 0, 1).
+		Foreground(lipgloss.Color("204"))
+	styles.Levels[log.InfoLevel] = lipgloss.NewStyle().
+		SetString("INFO").
+		Padding(0, 1, 0, 1).
+		Foreground(lipgloss.Color(cli_styles.UlldBlue))
 
-	content := fmt.Sprintf("%s\n", strings.Join(val, " "))
-	_, err := os.Stat(file_path)
-	if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("File doesn't exist")
-	} else {
-		fmt.Println(os.Getenv("UlldCliHasLogged"))
-		if os.Getenv("UlldCliHasLogged") != "true" {
-			f, err := os.OpenFile(file_path, os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Fatal(err)
-			}
-			_, err = f.WriteString("")
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-			err = f.Sync()
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-			f.Close()
-		}
-		f, err := os.OpenFile(file_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			cobra.CheckErr(err)
-		} else {
-			os.Setenv("UlldCliHasLogged", "true")
-		}
-		defer f.Close()
+	styles.Levels[log.WarnLevel] = lipgloss.NewStyle().
+		SetString("WARN").
+		Padding(0, 2, 0, 1).
+		Foreground(lipgloss.Color("#ffff00"))
 
-		if _, err := f.WriteString(content); err != nil {
-			cobra.CheckErr(err)
-		}
+	styles.Levels[log.FatalLevel] = lipgloss.NewStyle().
+		SetString("Oh Shit...").
+		Padding(0, 1, 0, 1).
+		Background(lipgloss.Color("204")).
+		Foreground(lipgloss.Color("0"))
+	styles.Keys["err"] = lipgloss.NewStyle().Foreground(lipgloss.Color("204"))
+	styles.Values["err"] = lipgloss.NewStyle().Bold(true)
+	log.SetStyles(styles)
+}
+
+// TODO: Need to test this dynamically. This is almost sure to not work as is. Find a way to bind the *singleton* instance of the logger to both stdout as text and to a json file as valid json.
+func setStructuredLogger() {
+	// handler := log.New(os.Stderr)
+	// logger := slog.New(handler)
+
+	logFile := viper.GetString("logFile")
+
+	if logFile != "" {
+		log.SetOutput(&lumberjack.Logger{
+			Filename:   logFile,
+			MaxSize:    500,
+			MaxBackups: 3,
+			MaxAge:     28,
+			Compress:   true,
+		})
 	}
 }
 
-// func DebugLog() {
-// 	if len(os.Getenv("DEBUG")) > 0 {
-// 		f, err := tea.LogToFile("debug.log", "debug")
-// 		if err != nil {
-// 			fmt.Println("fatal:", err)
-// 			os.Exit(1)
-// 		}
-// 		defer f.Close()
-// 	}
-// }
+func InitLogger(prefix string) {
+	// logger := log.New(os.Stderr)
+	log.SetTimeFormat(time.Kitchen)
+	log.SetPrefix(prefix)
+	ll := viper.Get("logLevel")
+	if ll != nil {
+		logLevel := ll.(log.Level)
+		log.SetLevel(logLevel)
+	}
+
+	setStructuredLogger()
+	setLoggerStyles()
+
+}

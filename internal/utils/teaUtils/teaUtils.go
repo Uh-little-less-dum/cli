@@ -4,7 +4,6 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // func NoExitFilter() {
@@ -73,11 +72,11 @@ type Eval[T any] struct {
 	loadingStart time.Time
 }
 
-type Theme struct {
-	Form           lipgloss.Style
-	Group          lipgloss.Style
-	FieldSeparator lipgloss.Style
-	Blurred        FieldStyles
-	Focused        FieldStyles
-	Help           help.Styles
-}
+// type Theme struct {
+// 	Form           lipgloss.Style
+// 	Group          lipgloss.Style
+// 	FieldSeparator lipgloss.Style
+// 	Blurred        FieldStyles
+// 	Focused        FieldStyles
+// 	Help           help.Styles
+// }

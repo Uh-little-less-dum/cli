@@ -1,75 +1,56 @@
-package confirmDir
+package confirmdir
 
 import (
-	"fmt"
 	"ulld/cli/internal/build/constants"
-	keyMap "ulld/cli/internal/build/keymap"
+	"ulld/cli/internal/signals"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 )
 
-type (
-	errMsg error
-)
-
-type ConfirmCurrentDirModel struct {
-	Stage        constants.BuildStage
-	confirmInput *huh.Confirm
-	keys         keyMap.KeyMap
-	value        *bool
-	err          error
+type Model struct {
+	form  *huh.Form
+	Stage constants.BuildStage
 }
 
-func InitialModel(title string, desc string) *ConfirmCurrentDirModel {
-	ci := huh.NewConfirm()
-	ci.Title(title)
-	ci.Description(desc)
-	initialVal := false
-	m := ConfirmCurrentDirModel{
-		Stage:        constants.ConfirmCurrentDirStage,
-		confirmInput: ci,
-		value:        &initialVal,
-		keys:         keyMap.DefaultKeymap,
+func NewModel(title string) Model {
+	return Model{
+		form: huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Key("useCurrentDir").
+					Title(title),
+			),
+		),
+		Stage: constants.ConfirmCurrentDirStage,
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return m.form.Init()
+}
+
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+
+	form, cmd := m.form.Update(msg)
+
+	var cmds = []tea.Cmd{cmd}
+
+	if f, ok := form.(*huh.Form); ok {
+		m.form = f
 	}
 
-	return &m
-}
-
-func (m ConfirmCurrentDirModel) Init() tea.Cmd {
-	return nil
-}
-
-func (m *ConfirmCurrentDirModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
-			return m, tea.Quit
-			// case key.Matches(msg, m.keys.Up):
-			//
-		}
-
-	// We handle errors just like any other message
-	case errMsg:
-		m.err = msg
-		return m, nil
+	if m.form.State == huh.StateCompleted {
+		d := m.form.GetBool("useCurrentDir")
+		c := signals.SetUseSelectedDir(d)
+		cmds = append(cmds, c)
 	}
 
-	ci, cmd := m.confirmInput.Update(msg)
+	return m, tea.Batch(cmds...)
 
-	// WARN: This ci.(*huh.Confirm) is printing 'no'. Not sure if it just prints that way, or if it's actually returning 'no'. Look up docs on type castng in Go ASAP.
-	m.confirmInput = ci.(*huh.Confirm)
-
-	return m, cmd
 }
 
-func (m *ConfirmCurrentDirModel) View() string {
-	return fmt.Sprintf(
-		"%s\n\n%s",
-		m.confirmInput.View(),
-		"(esc to quit)",
-	) + "\n"
+func (m Model) View() string {
+	// TODO: Come back and add a description or subtitle showing the currently populated active directory if it exist.
+	return m.form.View()
 }

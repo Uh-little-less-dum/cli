@@ -1,0 +1,25 @@
+import SettingsPageContainerTemplate from '#/components/slots/form/settingsPageContainer'
+import { SettingsPageContainerProps } from '@ulld/full-form/types'
+import { PickPageParams } from '@ulld/utilities/types'
+import React from 'react'
+import SettingPagePluginComponent from "{{.PluginName}}/{{.PluginSettingsExport}}"
+
+const pluginName = "{{.PluginName}}"
+
+interface SettingsPageProps extends PickPageParams<SettingsPageContainerProps> {
+
+}
+
+const SettingsPage = (props: SettingsPageProps) => {
+    return (
+        <SettingsPageContainerTemplate {...props} pluginName={pluginName} >
+            <SettingPagePluginComponent {...props} />
+        </SettingsPageContainerTemplate>
+    )
+}
+
+
+SettingsPage.displayName = `SettingsPage-${pluginName}`
+
+
+export default SettingsPage;

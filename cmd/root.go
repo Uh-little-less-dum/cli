@@ -5,12 +5,13 @@ package cmd
 
 import (
 	"os"
+	command_setup "ulld/cli/internal/utils/commandSetup"
 
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "dum",
 	Short: "Uh Little Less Dum",
 	Long: `A cli utility for the ULLD note taking and research framework.
@@ -23,27 +24,12 @@ This cli provides the primary ULLD build script and related commands, and will i
 
 // This should only be created in the rootCmd
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	var cfgFile string
-	var logFile string
-	// rootCmd
-
-	// NOT_IMPLEMENTED: Need to implement the entire config file handling.
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $ULLD_ADDITIONAL_SOURCES/cliConfig.json)")
-
-	rootCmd.PersistentFlags().StringVarP(&logFile, "logFile", "l", "", "Log output to this file. Useful for build failures and other debugging use cases.")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	cobra.OnInitialize(command_setup.InitializeCommand("", RootCmd))
 }

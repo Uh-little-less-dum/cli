@@ -1,14 +1,28 @@
 package cmd
 
 import (
+	"os"
 	"ulld/cli/internal/build"
+	cli_config "ulld/cli/internal/utils/initViper"
 
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// var (
-// 	logoStyle = lipgloss.NewStyle().Foreground(lipgloss.Color(ui.UlldBlue)).Bold(true)
-// )
+func GetDirPath(args []string) string {
+	var dirPath string
+	if len(args) == 1 {
+		dirPath = args[0]
+	} else {
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		dirPath = dir
+	}
+	return dirPath
+}
 
 var buildCmd = &cobra.Command{
 	Use:   "build",
@@ -17,17 +31,16 @@ var buildCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		env := build.UlldEnv{}
-		env.Init()
-		var dirPath string
-		if len(args) == 1 {
-			dirPath = args[0]
+		dirPath := GetDirPath(args)
+		if dirPath != "" {
+			viper.GetViper().Set("targetDir", dirPath)
 		}
-		build.BuildUlld(env, cmd, dirPath)
+		log.Debugf("Building ULLD in %s", dirPath)
+		build.BuildUlld(cmd, dirPath)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(buildCmd)
-	// buildCmd.Root().InitDefaultHelpCmd()
+	cobra.OnInitialize(cli_config.InitViper(buildCmd.Root()))
+	RootCmd.AddCommand(buildCmd)
 }

@@ -2,7 +2,6 @@ package keyMap
 
 import "github.com/charmbracelet/bubbles/key"
 
-
 var DefaultKeymap = KeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),

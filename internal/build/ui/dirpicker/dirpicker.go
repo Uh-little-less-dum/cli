@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 	"ulld/cli/internal/build/constants"
-	"ulld/cli/internal/utils/logger"
 
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/log"
 )
 
 type DirPickerModel struct {
@@ -28,7 +28,7 @@ func clearErrorAfter(t time.Duration) tea.Cmd {
 	})
 }
 
-func (m DirPickerModel) Init() tea.Cmd {
+func (m *DirPickerModel) Init() tea.Cmd {
 	return m.filepicker.Init()
 }
 
@@ -36,10 +36,10 @@ func (m DirPickerModel) GetValue() string {
 	return m.selectedFile
 }
 
-func (m DirPickerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *DirPickerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	didSelect, val := m.filepicker.DidSelectFile(msg)
 	if didSelect {
-		logger.DebugLog(val)
+		log.Debug(val)
 	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
