@@ -18,3 +18,6 @@ const (
 	PickTargetDirStage
 	CloneTemplateAppStage
 )
+
+const SparseCloneRepoUrl = "https://github.com/igloo1505/ulld.git"
+const SparseCloneSparsePath = "apps/template"

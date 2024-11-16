@@ -1,9 +1,11 @@
 package cmd
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build"
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
 	"os"
+
+	"github.com/igloo1505/ulldCli/internal/build"
+	command_setup "github.com/igloo1505/ulldCli/internal/utils/commandSetup"
+	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -41,6 +43,6 @@ var buildCmd = &cobra.Command{
 }
 
 func init() {
-	cobra.OnInitialize(cli_config.InitViper(buildCmd.Root()))
+	cobra.OnInitialize(command_setup.InitializeCommand(buildCmd, cli_config.BuildCmdName, ""))
 	RootCmd.AddCommand(buildCmd)
 }

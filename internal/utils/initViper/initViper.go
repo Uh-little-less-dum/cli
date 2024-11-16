@@ -10,6 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type CommandName int
+
+const (
+	RootCmdName CommandName = iota
+	BuildCmdName
+)
+
 type ViperWrapper struct {
 	viper            *viper.Viper
 	defaultConfigDir string
@@ -124,12 +131,24 @@ func (v *ViperWrapper) Init(cmd *cobra.Command) {
 	v.readConfig()
 
 	v.setLogLevel(cmd)
-
 }
 
-func InitViper(cmd *cobra.Command) func() {
+func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
+	v.viper.SetDefault("timeout", 30)
+	cmd.Flags().String("timeout", "info", "Log level")
+	err := v.viper.BindPFlag("timeout", cmd.Flags().Lookup("timeout"))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func InitViper(cmd *cobra.Command, buildName CommandName) func() {
 	return func() {
 		var v = ViperWrapper{}
 		v.Init(cmd)
+		switch buildName {
+		case BuildCmdName:
+			v.InitBuildCmd(cmd)
+		}
 	}
 }

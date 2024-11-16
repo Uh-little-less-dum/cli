@@ -1,6 +1,7 @@
 package cli_config
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -35,7 +36,7 @@ func Test_InitViperLogLevel(t *testing.T) {
 		{"logLevel set properly from environment", "warn"},
 	}
 	cmd := TestCmd
-	InitViper(cmd)()
+	InitViper(cmd, BuildCmdName)()
 	for _, tt := range vals {
 		os.Setenv("ULLD_LOG_LEVEL", tt.inputVal)
 		t.Run(tt.name, func(t *testing.T) {
@@ -69,7 +70,7 @@ func Test_InitViperAdditionalSources(t *testing.T) {
 		{"ULLD_ADDITIONAL_SOURCES set from environment", "~/dev-utils/ulld/"},
 	}
 	cmd := TestCmd
-	InitViper(cmd)()
+	InitViper(cmd, BuildCmdName)()
 	for _, tt := range vals {
 		os.Setenv("ULLD_ADDITIONAL_SOURCES", tt.inputVal)
 		t.Run(tt.name, func(t *testing.T) {
@@ -81,19 +82,23 @@ func Test_InitViperAdditionalSources(t *testing.T) {
 	}
 }
 
+type TestItem struct {
+	name     string
+	viperKey string
+	flagKey  string
+	inputVal string
+}
+
 func Test_Flags(t *testing.T) {
-	var vals = []struct {
-		name     string
-		viperKey string
-		flagKey  string
-		inputVal string
-	}{
+	var vals = []TestItem{
 		{"logFile", "logFile", "logFile", "/Users/bigsexy/Desktop/current/ulld/buildUtils/testLog.log"},
+		{"timeout", "timeout", "timeout", "30"},
 	}
 	cmd := TestCmd
 	for _, tt := range vals {
 		viper.Reset()
-		InitViper(cmd)()
+		cmd.ResetFlags()
+		InitViper(cmd, BuildCmdName)()
 		err := cmd.Flags().Set(tt.flagKey, tt.inputVal)
 		if err != nil {
 			t.Fatal(err)
@@ -102,6 +107,27 @@ func Test_Flags(t *testing.T) {
 			val := viper.GetViper().GetString(tt.viperKey)
 			if val != tt.inputVal {
 				t.Errorf("Expected %s, Received %s", tt.inputVal, val)
+			}
+		})
+	}
+}
+
+func Test_ViperDefaults(t *testing.T) {
+	var vals = []struct {
+		viperKey string
+		expected any
+	}{
+		{"timeout", 30},
+	}
+	cmd := TestCmd
+	for _, tt := range vals {
+		viper.Reset()
+		cmd.ResetFlags()
+		InitViper(cmd, BuildCmdName)()
+		t.Run(fmt.Sprintf("Default value for %s", tt.viperKey), func(t *testing.T) {
+			val := viper.GetViper().Get(tt.viperKey)
+			if val != tt.expected {
+				t.Errorf("Expected %s, Received %v", tt.expected, val)
 			}
 		})
 	}

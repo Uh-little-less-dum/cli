@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func InitializeCommand(loggerPrefix string, cmd *cobra.Command) func() {
+func InitializeCommand(cmd *cobra.Command, commandName cli_config.CommandName, loggerPrefix string) func() {
 	logger.InitLogger(loggerPrefix)
-	return cli_config.InitViper(cmd)
+	return cli_config.InitViper(cmd, commandName)
 }

@@ -3,11 +3,13 @@ package mainBuildModel
 import (
 	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
 	"github.com/igloo1505/ulldCli/internal/build/constants"
+	clone_template_app "github.com/igloo1505/ulldCli/internal/build/ui/cloneTemplateApp"
 	"github.com/igloo1505/ulldCli/internal/build/ui/confirmdir"
 	"github.com/igloo1505/ulldCli/internal/build/ui/filepicker"
 	"github.com/igloo1505/ulldCli/internal/keymap"
 	"github.com/igloo1505/ulldCli/internal/signals"
 	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
+	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -17,12 +19,13 @@ import (
 )
 
 type mainModel struct {
-	stage           constants.BuildStage
-	help            help.Model
-	confirmDirModel confirmdir.Model
-	targetDirModel  filepicker.Model
-	targetDir       string
-	quitting        bool
+	stage                 constants.BuildStage
+	help                  help.Model
+	confirmDirModel       confirmdir.Model
+	targetDirModel        filepicker.Model
+	cloneTemplateAppModel clone_template_app.Model
+	targetDir             string
+	quitting              bool
 }
 
 func (m mainModel) Init() tea.Cmd {
@@ -40,8 +43,14 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
 		cmds = append(cmds, cmd)
+		m.cloneTemplateAppModel, cmd = m.cloneTemplateAppModel.Update(msg)
+		cmds = append(cmds, cmd)
 	case signals.SetStageMsg:
 		m.stage = msg.NewStage
+	case signals.SetAcceptedTargetDirMsg:
+		m.stage = constants.CloneTemplateAppStage
+		m.targetDir = msg.TargetDir
+		viper.GetViper().Set("targetDir", msg.TargetDir)
 	case signals.SetUseSelectedDirMsg:
 		if msg.UseSelectedDir {
 			m.stage = constants.CloneTemplateAppStage
@@ -61,6 +70,9 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	case m.targetDirModel.Stage:
 		m.targetDirModel, cmd = m.targetDirModel.Update(msg)
+		cmds = append(cmds, cmd)
+	case m.cloneTemplateAppModel.Stage:
+		m.cloneTemplateAppModel, cmd = m.cloneTemplateAppModel.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 
@@ -89,12 +101,13 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 	}
 
 	val := mainModel{
-		stage:           cfg.InitialStage,
-		help:            help.New(),
-		targetDirModel:  filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?"),
-		confirmDirModel: confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
-		targetDir:       cfg.TargetDir,
-		quitting:        false,
+		stage:                 cfg.InitialStage,
+		help:                  help.New(),
+		targetDirModel:        filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?"),
+		confirmDirModel:       confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
+		cloneTemplateAppModel: clone_template_app.NewCloneTemplateAppUIModel(),
+		targetDir:             cfg.TargetDir,
+		quitting:              false,
 	}
 
 	return &val

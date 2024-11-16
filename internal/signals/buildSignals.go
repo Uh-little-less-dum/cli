@@ -6,8 +6,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// type errMsg struct{ error }
-
 type SetStageMsg struct {
 	err      error
 	NewStage constants.BuildStage
@@ -32,6 +30,20 @@ func SetUseSelectedDir(shouldUse bool) tea.Cmd {
 		return SetUseSelectedDirMsg{
 			err:            nil,
 			UseSelectedDir: shouldUse,
+		}
+	}
+}
+
+type SetAcceptedTargetDirMsg struct {
+	err       error
+	TargetDir string
+}
+
+func SetAcceptedTargetDir(dirPath string) tea.Cmd {
+	return func() tea.Msg {
+		return SetAcceptedTargetDirMsg{
+			err:       nil,
+			TargetDir: dirPath,
 		}
 	}
 }

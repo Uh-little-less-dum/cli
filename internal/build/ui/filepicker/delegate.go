@@ -6,6 +6,20 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type AcceptPathMsg struct {
+	err error
+	Dir string
+}
+
+func SendAcceptPathMsg(dirPath string) tea.Cmd {
+	return func() tea.Msg {
+		return AcceptPathMsg{
+			err: nil,
+			Dir: dirPath,
+		}
+	}
+}
+
 func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 	d := list.NewDefaultDelegate()
 	d.ShowDescription = false
@@ -25,7 +39,7 @@ func newItemDelegate(keys *delegateKeyMap) list.DefaultDelegate {
 		case tea.KeyMsg:
 			switch {
 			case key.Matches(msg, keys.choose):
-				return m.NewStatusMessage(statusMessageStyle("You chose " + title))
+				return SendAcceptPathMsg(title)
 			}
 		}
 

@@ -1,7 +1,10 @@
 package filepicker
 
 import (
+	"path"
+
 	"github.com/igloo1505/ulldCli/internal/build/constants"
+	"github.com/igloo1505/ulldCli/internal/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 
@@ -132,12 +135,17 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 		m.state = ready
 		return m, nil
+	case AcceptPathMsg:
+		fullPath := path.Join(m.fsDir.Path, msg.Dir)
+		cmd := signals.SetAcceptedTargetDir(fullPath)
+		return m, cmd
 	case SetNewDirMessage:
-		items := getParentListItems(m.fsDir)
-		setItemsCmd := m.list.SetItems(items)
-		return m, setItemsCmd
-	case SetParentDirMessage:
 		items := getListItems(m.fsDir, msg.NewDir, false)
+		setItemsCmd := m.list.SetItems(items)
+		statusCmd := m.list.NewStatusMessage(statusMessageStyle("Now in " + msg.NewDir))
+		return m, tea.Batch(setItemsCmd, statusCmd)
+	case SetParentDirMessage:
+		items := getParentListItems(m.fsDir)
 		setItemsCmd := m.list.SetItems(items)
 		return m, setItemsCmd
 	case tea.KeyMsg:
@@ -169,12 +177,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.toggleHelpMenu):
 			m.list.SetShowHelp(!m.list.ShowHelp())
 			return m, nil
-
 		case key.Matches(msg, m.keys.enterItem):
 			newItem := m.list.SelectedItem().FilterValue()
 			cmd := SetNewFilePickerDir(newItem)
-			statusCmd := m.list.NewStatusMessage(statusMessageStyle("Now in " + newItem))
-			return m, tea.Batch(cmd, statusCmd)
+			return m, cmd
 		case key.Matches(msg, m.keys.goToParent):
 			cmd := SetParentDir()
 			return m, cmd
