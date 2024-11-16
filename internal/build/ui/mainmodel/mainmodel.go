@@ -26,6 +26,7 @@ type mainModel struct {
 	cloneTemplateAppModel clone_template_app.Model
 	targetDir             string
 	quitting              bool
+	// lock                  sync.Mutex
 }
 
 func (m mainModel) Init() tea.Cmd {
@@ -48,15 +49,19 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case signals.SetStageMsg:
 		m.stage = msg.NewStage
 	case signals.SetAcceptedTargetDirMsg:
-		m.stage = constants.CloneTemplateAppStage
 		m.targetDir = msg.TargetDir
 		viper.GetViper().Set("targetDir", msg.TargetDir)
+		cmd := signals.SetStage(constants.CloneTemplateAppStage)
+		cmds = append(cmds, cmd)
+		return m, tea.Batch(cmds...)
 	case signals.SetUseSelectedDirMsg:
 		if msg.UseSelectedDir {
-			m.stage = constants.CloneTemplateAppStage
+			cmd = signals.SetStage(constants.CloneTemplateAppStage)
 		} else {
-			m.stage = constants.PickTargetDirStage
+			cmd = signals.SetStage(constants.PickTargetDirStage)
 		}
+		cmds = append(cmds, cmd)
+		return m, tea.Batch(cmds...)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, keymap.Keymap.Quit):

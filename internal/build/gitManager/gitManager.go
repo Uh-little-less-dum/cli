@@ -28,7 +28,7 @@ func (g GitManager) SparseClone(targetDir string) {
 		// Progress:   progressManager,
 	})
 	if err == git.ErrRepositoryAlreadyExists {
-		// TODO: Move to a rebuild here once the build is in a working order!
+		// PRIORITY: Move to a rebuild here once the build is in a working order!
 		log.Fatal("repo was already cloned")
 	}
 	checkError(err)

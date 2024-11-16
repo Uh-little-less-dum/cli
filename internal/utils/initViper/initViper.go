@@ -135,11 +135,9 @@ func (v *ViperWrapper) Init(cmd *cobra.Command) {
 
 func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
 	v.viper.SetDefault("timeout", 30)
-	cmd.Flags().String("timeout", "info", "Log level")
+	cmd.Flags().Int("timeout", 30, "Log level")
 	err := v.viper.BindPFlag("timeout", cmd.Flags().Lookup("timeout"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err)
 }
 
 func InitViper(cmd *cobra.Command, buildName CommandName) func() {

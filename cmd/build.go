@@ -37,7 +37,7 @@ var buildCmd = &cobra.Command{
 		if dirPath != "" {
 			viper.GetViper().Set("targetDir", dirPath)
 		}
-		log.Debugf("Building ULLD in %s", dirPath)
+		log.Debugf("Proceeding with the initial target directory set to %s", dirPath)
 		build.BuildUlld(cmd, dirPath)
 	},
 }
