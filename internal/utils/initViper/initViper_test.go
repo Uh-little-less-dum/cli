@@ -55,6 +55,32 @@ func Test_InitViperLogLevel(t *testing.T) {
 	}
 }
 
+func Test_InitViperAdditionalSources(t *testing.T) {
+	globalLogLevel, ok := os.LookupEnv("ULLD_ADDITIONAL_SOURCES")
+	if !ok {
+		os.Setenv("ULLD_LOG_LEVEL", "debug")
+		globalLogLevel = "debug"
+	}
+	var vals = []struct {
+		name     string
+		inputVal string
+	}{
+		{"ULLD_ADDITIONAL_SOURCES set from environment", globalLogLevel},
+		{"ULLD_ADDITIONAL_SOURCES set from environment", "~/dev-utils/ulld/"},
+	}
+	cmd := TestCmd
+	InitViper(cmd)()
+	for _, tt := range vals {
+		os.Setenv("ULLD_ADDITIONAL_SOURCES", tt.inputVal)
+		t.Run(tt.name, func(t *testing.T) {
+			value := viper.GetViper().GetString("configDir")
+			if value != tt.inputVal {
+				t.Errorf("Expected '%s', received '%s'", tt.inputVal, value)
+			}
+		})
+	}
+}
+
 func Test_Flags(t *testing.T) {
 	var vals = []struct {
 		name     string

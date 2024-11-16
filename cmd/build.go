@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/igloo1505/ulldCli/internal/build"
+	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
 	"os"
-	"ulld/cli/internal/build"
-	cli_config "ulld/cli/internal/utils/initViper"
 
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"

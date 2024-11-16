@@ -1,6 +1,9 @@
 package cli_styles
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
+)
 
 var UlldBlue = "#0ba5e9"
 
@@ -23,3 +26,11 @@ var TitleStyle = lipgloss.NewStyle().
 	Padding(0, 1)
 
 var UlldBlueForeground = lipgloss.NewStyle().Foreground(UlldBlueLipgloss)
+
+func GetHuhTheme() *huh.Theme {
+	t := huh.ThemeCharm()
+	t.Blurred.Title = UlldBlueForeground
+	t.Focused.FocusedButton = lipgloss.NewStyle().Background(UlldBlueLipgloss).Inherit(t.Focused.FocusedButton)
+	t.Blurred.FocusedButton = t.Blurred.FocusedButton.Background(UlldBlueLipgloss)
+	return t
+}

@@ -1,7 +1,7 @@
 package buildConfig
 
 import (
-	"ulld/cli/internal/build/constants"
+	"github.com/igloo1505/ulldCli/internal/build/constants"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

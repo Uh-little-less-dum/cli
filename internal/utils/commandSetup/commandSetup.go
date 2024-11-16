@@ -1,8 +1,8 @@
 package command_setup
 
 import (
-	cli_config "ulld/cli/internal/utils/initViper"
-	"ulld/cli/internal/utils/logger"
+	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
+	"github.com/igloo1505/ulldCli/internal/utils/logger"
 
 	"github.com/spf13/cobra"
 )

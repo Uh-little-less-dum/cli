@@ -1,7 +1,7 @@
 package signals
 
 import (
-	"ulld/cli/internal/build/constants"
+	"github.com/igloo1505/ulldCli/internal/build/constants"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

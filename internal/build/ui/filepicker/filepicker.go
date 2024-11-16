@@ -1,9 +1,9 @@
 package filepicker
 
 import (
-	"ulld/cli/internal/build/constants"
-	cli_styles "ulld/cli/internal/styles"
-	fs_utils "ulld/cli/internal/utils/fs"
+	"github.com/igloo1505/ulldCli/internal/build/constants"
+	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"

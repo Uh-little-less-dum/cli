@@ -4,8 +4,8 @@ Copyright © 2024 Anderw Mueller <aiglinski414@gmail.com>
 package cmd
 
 import (
+	command_setup "github.com/igloo1505/ulldCli/internal/utils/commandSetup"
 	"os"
-	command_setup "ulld/cli/internal/utils/commandSetup"
 
 	"github.com/spf13/cobra"
 )

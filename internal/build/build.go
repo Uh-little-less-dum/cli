@@ -1,8 +1,8 @@
 package build
 
 import (
-	buildConfig "ulld/cli/internal/build/config"
-	mainBuildModel "ulld/cli/internal/build/ui/mainmodel"
+	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
+	mainBuildModel "github.com/igloo1505/ulldCli/internal/build/ui/mainmodel"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"

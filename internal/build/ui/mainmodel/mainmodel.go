@@ -1,14 +1,13 @@
 package mainBuildModel
 
 import (
-	buildConfig "ulld/cli/internal/build/config"
-	"ulld/cli/internal/build/constants"
-	keyMap "ulld/cli/internal/build/keymap"
-	"ulld/cli/internal/build/ui/confirmdir"
-	"ulld/cli/internal/build/ui/filepicker"
-	"ulld/cli/internal/keymap"
-	"ulld/cli/internal/signals"
-	fs_utils "ulld/cli/internal/utils/fs"
+	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
+	"github.com/igloo1505/ulldCli/internal/build/constants"
+	"github.com/igloo1505/ulldCli/internal/build/ui/confirmdir"
+	"github.com/igloo1505/ulldCli/internal/build/ui/filepicker"
+	"github.com/igloo1505/ulldCli/internal/keymap"
+	"github.com/igloo1505/ulldCli/internal/signals"
+	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -20,7 +19,6 @@ import (
 type mainModel struct {
 	stage           constants.BuildStage
 	help            help.Model
-	keys            keyMap.KeyMap
 	confirmDirModel confirmdir.Model
 	targetDirModel  filepicker.Model
 	targetDir       string
@@ -85,15 +83,16 @@ func (m mainModel) View() string {
 
 func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 	homeDir, err := homedir.Dir()
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	val := mainModel{
 		stage:           cfg.InitialStage,
 		help:            help.New(),
-		keys:            keyMap.DefaultKeymap,
 		targetDirModel:  filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?"),
-		confirmDirModel: confirmdir.NewModel("Do you want to build ULLD in your current directory?"),
+		confirmDirModel: confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
 		targetDir:       cfg.TargetDir,
 		quitting:        false,
 	}

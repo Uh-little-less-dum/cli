@@ -2,8 +2,10 @@ package logger
 
 import (
 	"time"
-	cli_styles "ulld/cli/internal/styles"
 
+	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
@@ -47,6 +49,8 @@ func setStructuredLogger() {
 	// handler := log.New(os.Stderr)
 	// logger := slog.New(handler)
 
+	// WARN: Turn this off or set this conditionally when ready to release.
+	tea.LogToFile("/Users/bigsexy/Desktop/Go/projects/ulld/cli/dev.log", "")
 	logFile := viper.GetString("logFile")
 
 	if logFile != "" {
