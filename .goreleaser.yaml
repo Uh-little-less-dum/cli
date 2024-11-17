@@ -18,13 +18,6 @@ before:
 
 builds:
   - binary: ulldCli
-    goos:
-      - darwin
-      - linux
-    goarch:
-      - amd64
-      - arm64
-      - darwin
     env:
       - CGO_ENABLED=0
     flags:
