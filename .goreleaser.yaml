@@ -35,7 +35,7 @@ brews:
     license: MIT
     repository:
       owner: Uh-little-less-dum
-      name: cli-homebrew
+      name: homebrew-cli
       branch: main
     commit_author:
       name: Uh-little-less-dum
