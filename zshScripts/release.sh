@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/zsh
 
 cd /Users/bigsexy/Desktop/Go/projects/ulld/cli || exit
 
-. /Users/bigsexy/Desktop/Go/projects/ulld/cli/.env.zsh
+source /Users/bigsexy/Desktop/Go/projects/ulld/cli/.env.zsh
 
 git add .
 
