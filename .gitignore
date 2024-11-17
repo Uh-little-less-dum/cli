@@ -1,6 +1,10 @@
 debug.log
 scripts
+.vscode
 
 dist/
 cli
 coverage
+dev.log
+.env.zsh
+ulldCli

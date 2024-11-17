@@ -24,6 +24,16 @@ builds:
       - windows
       - darwin
 
+release:
+  mode: keep-existing
+  header: |
+     ## Ulld release ({{ .Date }})
+      
+     Checkout the new release!
+
+  make_latest: true
+
+  
 archives:
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
@@ -47,3 +57,9 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+announce:
+  bluesky:
+    enabled: true
+    message_template: "The new ULLD cli is out now!"
+    username: "uhlittlelessdum.bsky.social"
