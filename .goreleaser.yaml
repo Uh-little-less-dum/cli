@@ -20,8 +20,8 @@ builds:
   - binary: ulldCli
     env:
       - CGO_ENABLED=0
-    flags:
-      - -mod=vendor
+    # flags:
+    #   - -mod=vendor
 
 release:
   mode: keep-existing
