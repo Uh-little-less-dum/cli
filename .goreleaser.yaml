@@ -7,54 +7,49 @@
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 version: 2
-
-before: 
+before:
   hooks:
     # Turn this back on when ready to publish a full release version. Can't run tidy while I'm stuck offline so much, because that will clear all unused modules that I will eventually need.
     # - go mod tidy
     # you may remove this if you don't need go generate
     - go generate ./...
-
-
 builds:
   - binary: ulldCli
     env:
       - CGO_ENABLED=0
-    # flags:
-    #   - -mod=vendor
-
+    goos:
+      - linux
+      - darwin
+      - windows
 release:
   mode: keep-existing
-  header: |
-     ## Ulld release ({{ .Date }})
-      
-     Checkout the new release!
-
+  header: "## Ulld release ({{ .Date }})\n \nCheckout the new release!\n"
   prerelease: auto
-
 universal_binaries:
-  - replace: true
-
+  - replace: false
 brews:
-  - 
-    name: ulldCli
+  - name: ulldCli
     homepage: https://uhlittlelessdum.com
+    description: "The cli for ULLD, a free, open source note taking framework for academics, students and developers."
+    directory: Formula
+    license: MIT
+    repository:
+      owner: Uh-little-less-dum
+      name: cli-homebrew
+      branch: main
     commit_author:
       name: Uh-little-less-dum
       email: uhlittlelessdumb@gmail.com
-
-
+    dependencies:
+      - git
 checksum:
   name_template: checksums.txt
-
-
 changelog:
   sort: asc
   filters:
     exclude:
       - "^docs:"
       - "^test:"
-
 announce:
   bluesky:
     enabled: true
