@@ -1,6 +1,7 @@
 package git_manager
 
 import (
+	"io"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -21,11 +22,11 @@ func checkError(err error) {
 	}
 }
 
-func (g GitManager) SparseClone(targetDir string) {
+func (g GitManager) SparseClone(targetDir string, outputManager io.Writer) {
 	r, err := git.PlainClone(g.Directory, false, &git.CloneOptions{
 		URL:        g.Url,
 		NoCheckout: true,
-		// Progress:   progressManager,
+		Progress:   outputManager,
 	})
 	if err == git.ErrRepositoryAlreadyExists {
 		// PRIORITY: Move to a rebuild here once the build is in a working order!

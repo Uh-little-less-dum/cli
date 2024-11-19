@@ -47,3 +47,27 @@ func SetAcceptedTargetDir(dirPath string) tea.Cmd {
 		}
 	}
 }
+
+type SetQuittingMsg struct {
+	err error
+}
+
+func SetQuittingMessage(err error) tea.Cmd {
+	return func() tea.Msg {
+		return SetQuittingMsg{
+			err: err,
+		}
+	}
+}
+
+type StdOutWrapperOutputMsg struct {
+	Body string
+}
+
+func SendStdOutWrapperOutputMsg(content string) tea.Cmd {
+	return func() tea.Msg {
+		return StdOutWrapperOutputMsg{
+			Body: content,
+		}
+	}
+}

@@ -14,9 +14,6 @@ var TestCmd = &cobra.Command{
 	Use:   "dumTest",
 	Short: "",
 	Long:  ``,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 func Test_InitViperLogLevel(t *testing.T) {
@@ -70,9 +67,11 @@ func Test_InitViperAdditionalSources(t *testing.T) {
 		{"ULLD_ADDITIONAL_SOURCES set from environment", "~/dev-utils/ulld/"},
 	}
 	cmd := TestCmd
-	InitViper(cmd, BuildCmdName)()
 	for _, tt := range vals {
+		cmd.ResetFlags()
+		viper.Reset()
 		os.Setenv("ULLD_ADDITIONAL_SOURCES", tt.inputVal)
+		InitViper(cmd, BuildCmdName)()
 		t.Run(tt.name, func(t *testing.T) {
 			value := viper.GetViper().GetString("configDir")
 			if value != tt.inputVal {

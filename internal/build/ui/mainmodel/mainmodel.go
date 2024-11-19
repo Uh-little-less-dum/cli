@@ -62,6 +62,9 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		cmds = append(cmds, cmd)
 		return m, tea.Batch(cmds...)
+	case signals.SetQuittingMsg:
+		m.quitting = true
+		return m, tea.Quit
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, keymap.Keymap.Quit):

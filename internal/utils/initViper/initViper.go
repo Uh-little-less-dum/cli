@@ -52,9 +52,7 @@ func (v *ViperWrapper) setConfigPaths(cmd *cobra.Command) {
 	v.viper.SetConfigName("cliConfig")
 	v.viper.SetConfigType("json")
 
-	var cfgDir string
-
-	cmd.PersistentFlags().StringVarP(&cfgDir, "configDir", "c", "", "config directory (default is $HOME/.ulld or $ULLD_ADDITIONAL_SOURCES)")
+	cmd.PersistentFlags().StringP("configDir", "c", "", "config directory (default is $HOME/.ulld or $ULLD_ADDITIONAL_SOURCES)")
 	err := v.viper.BindPFlag("configDir", cmd.PersistentFlags().Lookup("configDir"))
 	handleErr(err)
 	err = v.viper.BindEnv("configDir", "ULLD_ADDITIONAL_SOURCES")
@@ -73,8 +71,10 @@ func (v *ViperWrapper) readConfig() {
 		}
 	}
 	cfgFile := v.viper.ConfigFileUsed()
-	dirPath := path.Dir(cfgFile)
-	v.viper.Set("configDir", dirPath)
+	if cfgFile != "" {
+		dirPath := path.Dir(cfgFile)
+		v.viper.Set("configDir", dirPath)
+	}
 }
 
 func (v *ViperWrapper) setConfigDefaults() {
