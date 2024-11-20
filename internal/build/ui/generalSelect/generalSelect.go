@@ -1,12 +1,8 @@
-package filepicker
+package general_select
 
 import (
-	"path"
-
 	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
-	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -15,11 +11,7 @@ import (
 )
 
 var (
-	appStyle = lipgloss.NewStyle().Padding(1, 2)
-
-	statusMessageStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
-				Render
+	appStyle           = lipgloss.NewStyle().Padding(1, 2)
 	selectedTitleStyle = lipgloss.NewStyle().
 				Border(lipgloss.NormalBorder(), false, false, false, true).
 				BorderForeground(cli_styles.UlldBlueLipgloss).
@@ -41,20 +33,10 @@ type listKeyMap struct {
 	toggleStatusBar  key.Binding
 	togglePagination key.Binding
 	toggleHelpMenu   key.Binding
-	enterItem        key.Binding
-	goToParent       key.Binding
 }
 
 func newListKeyMap() *listKeyMap {
 	return &listKeyMap{
-		enterItem: key.NewBinding(
-			key.WithKeys("o"),
-			key.WithHelp("o", "enter directory"),
-		),
-		goToParent: key.NewBinding(
-			key.WithKeys("O"),
-			key.WithHelp("O", "to parent directory"),
-		),
 		toggleSpinner: key.NewBinding(
 			key.WithKeys("s"),
 			key.WithHelp("s", "toggle spinner"),
@@ -87,7 +69,6 @@ const (
 
 type Model struct {
 	list          list.Model
-	fsDir         *fs_utils.FSDirectory
 	Stage         constants.BuildStage
 	keys          *listKeyMap
 	delegateKeys  *delegateKeyMap
@@ -135,19 +116,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 		m.state = ready
 		return m, nil
-	case AcceptPathMsg:
-		fullPath := path.Join(m.fsDir.Path, msg.Dir)
-		cmd := signals.SetAcceptedTargetDir(fullPath)
-		return m, cmd
-	case SetNewDirMessage:
-		items := getListItems(m.fsDir, msg.NewDir, false)
-		setItemsCmd := m.list.SetItems(items)
-		statusCmd := m.list.NewStatusMessage(statusMessageStyle("Now in " + msg.NewDir))
-		return m, tea.Batch(setItemsCmd, statusCmd)
-	case SetParentDirMessage:
-		items := getParentListItems(m.fsDir)
-		setItemsCmd := m.list.SetItems(items)
-		return m, setItemsCmd
 	case tea.KeyMsg:
 		// Don't match any of the keys below if we're actively filtering.
 		if (m.list.FilterState() == list.Filtering) || (m.state == initializing) {
@@ -177,13 +145,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.toggleHelpMenu):
 			m.list.SetShowHelp(!m.list.ShowHelp())
 			return m, nil
-		case key.Matches(msg, m.keys.enterItem):
-			newItem := m.list.SelectedItem().FilterValue()
-			cmd := SetNewFilePickerDir(newItem)
-			return m, cmd
-		case key.Matches(msg, m.keys.goToParent):
-			cmd := SetParentDir()
-			return m, cmd
 		}
 	}
 
@@ -201,36 +162,18 @@ func (m Model) View() string {
 	return appStyle.Render(res)
 }
 
-func getParentListItems(fsDir *fs_utils.FSDirectory) []list.Item {
-	itemStrings := fsDir.GetParentData()
-	numItems := len(itemStrings)
-	items := make([]list.Item, numItems)
-	for i := 0; i < numItems; i++ {
-		items[i] = item{title: itemStrings[i], desc: itemStrings[i]}
+func getListItems(opts []string) []list.Item {
+	var items []list.Item
+	for _, s := range opts {
+		items = append(items, item{title: s, desc: s})
 	}
 	return items
 }
 
-func getListItems(fsDir *fs_utils.FSDirectory, dirPath string, isInitial bool) []list.Item {
-	var itemStrings []string
-	if isInitial {
-		itemStrings = fsDir.GetDataFromAbsolutePath(dirPath)
-	} else {
-		itemStrings = fsDir.GetNewData(dirPath)
-	}
-	numItems := len(itemStrings)
-	items := make([]list.Item, numItems)
-	for i := 0; i < numItems; i++ {
-		items[i] = item{title: itemStrings[i], desc: itemStrings[i]}
-	}
-	return items
-}
-
-func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title string, stage constants.BuildStage) Model {
-	fsDir := fs_utils.FSDirectory{Path: initialDir, DataType: dataType}
-	items := getListItems(&fsDir, initialDir, true)
+func NewModel(opts []string, title string, onAccept OnAcceptFunc, stage constants.BuildStage) Model {
+	items := getListItems(opts)
 	delegateKeys := newDelegateKeyMap()
-	delegate := newItemDelegate(delegateKeys)
+	delegate := newItemDelegate(delegateKeys, onAccept)
 	delegate.Styles.SelectedTitle = selectedTitleStyle
 	delegate.Styles.SelectedDesc = selectedTitleStyle.Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"})
 
@@ -241,7 +184,6 @@ func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title str
 	list.Title = title
 	list.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
-			listKeys.enterItem,
 			listKeys.toggleSpinner,
 			listKeys.toggleTitleBar,
 			listKeys.toggleStatusBar,
@@ -255,6 +197,5 @@ func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title str
 		delegateKeys: delegateKeys,
 		Stage:        stage,
 		state:        initializing,
-		fsDir:        &fsDir,
 	}
 }

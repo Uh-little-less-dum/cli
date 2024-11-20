@@ -4,7 +4,7 @@
 //    cLIConfig, err := UnmarshalCLIConfig(bytes)
 //    bytes, err = cLIConfig.Marshal()
 
-package main
+package schemas_cli_config
 
 import "encoding/json"
 
@@ -19,15 +19,15 @@ func (r *CLIConfig) Marshal() ([]byte, error) {
 }
 
 type CLIConfig struct {
-	Build *Build `json:"build,omitempty"`
-	// Absolute path to a log file used during the build process.
-	LogFile  *string   `json:"logFile,omitempty"`
-	LogLevel *LogLevel `json:"logLevel,omitempty"`
+	Build                                                        *Build    `json:"build,omitempty"`
+	// Absolute path to a log file used during the build process.          
+	LogFile                                                      *string   `json:"logFile,omitempty"`
+	LogLevel                                                     *LogLevel `json:"logLevel,omitempty"`
 }
 
 type Build struct {
-	// Absolute path to the directory where the ULLD app should be generated.
-	BuildDir *string `json:"buildDir,omitempty"`
+	// Absolute path to the directory where the ULLD app should be generated.        
+	BuildDir                                                                 *string `json:"buildDir,omitempty"`
 }
 
 type LogLevel string

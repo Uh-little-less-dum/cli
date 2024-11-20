@@ -7,8 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/igloo1505/ulldCli/internal/build/constants"
-	clone_template_app_manager "github.com/igloo1505/ulldCli/internal/build/stages"
 	stdout_wrapper "github.com/igloo1505/ulldCli/internal/build/ui/stdoutWrapper"
+	stage_clone_template_app "github.com/igloo1505/ulldCli/internal/buildScript/stages/stage_clone_template_app/createTemplateApp/clone"
 	"github.com/igloo1505/ulldCli/internal/signals"
 	"github.com/spf13/viper"
 )
@@ -72,12 +72,8 @@ func (m Model) View() string {
 	return m.outputWrapper.View()
 }
 
-// func (m Model) Write(p []byte) (n int, err error) {
-// 	return 0, nil
-// }
-
 func (m Model) beginSparseClone(targetDir string) {
-	clone_template_app_manager.CloneTemplateApp(targetDir, m.outputWrapper)
+	stage_clone_template_app.Run(targetDir, m.outputWrapper)
 }
 
 func NewCloneTemplateAppUIModel() Model {

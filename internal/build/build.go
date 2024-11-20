@@ -1,7 +1,7 @@
 package build
 
 import (
-	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
+	build_config "github.com/igloo1505/ulldCli/internal/build/config"
 	mainBuildModel "github.com/igloo1505/ulldCli/internal/build/ui/mainmodel"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,7 +9,7 @@ import (
 )
 
 func BuildUlld(cmd *cobra.Command, dirPath string) {
-	var cfg buildConfig.BuildConfigOpts
+	var cfg build_config.BuildConfigOpts
 	cfg.Init(cmd, dirPath)
 	mm := mainBuildModel.InitialMainModel(&cfg)
 

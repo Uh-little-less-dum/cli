@@ -30,7 +30,8 @@ var UlldBlueForeground = lipgloss.NewStyle().Foreground(UlldBlueLipgloss)
 func GetHuhTheme() *huh.Theme {
 	t := huh.ThemeCharm()
 	t.Blurred.Title = UlldBlueForeground
-	t.Focused.FocusedButton = lipgloss.NewStyle().Background(UlldBlueLipgloss).Inherit(t.Focused.FocusedButton)
+	t.Focused.Title = UlldBlueForeground
+	t.Focused.FocusedButton = t.Focused.FocusedButton.Background(UlldBlueLipgloss)
 	t.Blurred.FocusedButton = t.Blurred.FocusedButton.Background(UlldBlueLipgloss)
 	return t
 }

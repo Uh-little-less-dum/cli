@@ -71,3 +71,37 @@ func SendStdOutWrapperOutputMsg(content string) tea.Cmd {
 		}
 	}
 }
+
+type SetConfigLocMethod_WaitForClone struct {
+}
+
+func SendConfigLocMethod_WaitForClone() tea.Cmd {
+	return func() tea.Msg {
+		return SetConfigLocMethod_WaitForClone{}
+	}
+}
+
+type SetConfigLocMethod_pickFile struct {
+}
+
+func SendConfigLocMethod_pickFile() tea.Cmd {
+	return func() tea.Msg {
+		return SetConfigLocMethod_pickFile{}
+	}
+}
+
+func SendUseEnvConfigResponse(wasAccepted bool) tea.Cmd {
+	return func() tea.Msg {
+		if wasAccepted {
+			return SetStageMsg{
+				err:      nil,
+				NewStage: constants.CloneTemplateAppStage,
+			}
+		} else {
+			return SetStageMsg{
+				err:      nil,
+				NewStage: constants.ChooseWaitOrPickConfigLoc,
+			}
+		}
+	}
+}

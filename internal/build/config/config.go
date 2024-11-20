@@ -1,4 +1,4 @@
-package buildConfig
+package build_config
 
 import (
 	"github.com/igloo1505/ulldCli/internal/build/constants"

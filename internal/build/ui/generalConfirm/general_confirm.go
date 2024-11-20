@@ -1,32 +1,39 @@
-package confirmdir
+package general_confirm
 
 import (
 	"github.com/igloo1505/ulldCli/internal/build/constants"
 	"github.com/igloo1505/ulldCli/internal/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
-	"github.com/spf13/viper"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 )
 
+const valueKey string = "adbajkafajl"
+
+type OnResponseFunc func(wasAccepted bool) tea.Cmd
+
 type Model struct {
-	form    *huh.Form
-	Stage   constants.BuildStage
-	confirm *huh.Confirm
+	form        *huh.Form
+	Stage       constants.BuildStage
+	confirm     *huh.Confirm
+	Description string
+	OnResponse  OnResponseFunc
+	Value       *bool
 }
 
-func NewModel(title string) Model {
+func NewModel(title, desc string, onResponse OnResponseFunc, stage constants.BuildStage) Model {
 	theme := cli_styles.GetHuhTheme()
+	var b bool
 	c := huh.NewConfirm().
-		Key("useCurrentDir").
+		Value(&b).
+		Key(valueKey).
 		Title(title).
-		Affirmative("Yup").
+		Affirmative("Yes").
 		Negative("No")
 
-	d := viper.GetViper().GetString("targetDir")
-	if d != "" {
-		c.Description(d)
+	if desc != "" {
+		c = c.Description(desc)
 	}
 	return Model{
 		form: huh.NewForm(
@@ -34,13 +41,29 @@ func NewModel(title string) Model {
 				c,
 			),
 		).WithTheme(theme),
-		Stage:   constants.ConfirmCurrentDirStage,
-		confirm: c,
+		OnResponse: onResponse,
+		Stage:      stage,
+		confirm:    c,
+		Value:      &b,
 	}
 }
 
+func (m Model) Focus() tea.Cmd {
+	return m.confirm.Focus()
+}
+
+type forceUpdate struct{}
+
+func sendForceUpdate() tea.Msg {
+	return forceUpdate{}
+}
+
+func (m *Model) SetDescription(desc string) {
+	m.confirm.Description(desc)
+}
+
 func (m Model) Init() tea.Cmd {
-	return m.form.Init()
+	return tea.Batch(m.form.Init(), sendForceUpdate)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -55,7 +78,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msgType := msg.(type) {
 	case signals.SetStageMsg:
-		if msgType.NewStage == constants.ConfirmCurrentDirStage {
+		if msgType.NewStage == m.Stage {
 			cmds = append(cmds, m.confirm.Focus())
 		} else {
 			cmds = append(cmds, m.confirm.Blur())
@@ -63,9 +86,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	if m.form.State == huh.StateCompleted {
-		d := m.form.GetBool("useCurrentDir")
-		c := signals.SetUseSelectedDir(d)
-		cmds = append(cmds, c)
+		d := m.form.GetBool(valueKey)
+		cmds = append(cmds, m.OnResponse(d))
 	}
 
 	return m, tea.Batch(cmds...)

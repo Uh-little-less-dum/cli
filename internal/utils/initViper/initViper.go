@@ -15,6 +15,7 @@ type CommandName int
 const (
 	RootCmdName CommandName = iota
 	BuildCmdName
+	MockCmdName
 )
 
 type ViperWrapper struct {
@@ -73,7 +74,9 @@ func (v *ViperWrapper) readConfig() {
 	cfgFile := v.viper.ConfigFileUsed()
 	if cfgFile != "" {
 		dirPath := path.Dir(cfgFile)
-		v.viper.Set("configDir", dirPath)
+		if dirPath != "" {
+			v.viper.Set("configDir", dirPath)
+		}
 	}
 }
 
@@ -104,13 +107,12 @@ func (v *ViperWrapper) setFlags(cmd *cobra.Command) {
 	handleErr(err)
 }
 
-func (v *ViperWrapper) setLogLevel(cmd *cobra.Command) {
+func (v *ViperWrapper) applyLogLevel() {
 
 	llString := v.viper.GetString("logLevel")
 
 	if llString != "" {
 		parsedLevel, err := log.ParseLevel(llString)
-
 		if err != nil {
 			log.Debugf("Provided log level of %s is not a supported log level.", llString)
 		} else {
@@ -130,7 +132,7 @@ func (v *ViperWrapper) Init(cmd *cobra.Command) {
 
 	v.readConfig()
 
-	v.setLogLevel(cmd)
+	v.applyLogLevel()
 }
 
 func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
