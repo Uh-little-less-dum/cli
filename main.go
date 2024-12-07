@@ -1,11 +1,11 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Andrew Mueller aiglinski414@gmail.com
 
 */
 
 package main
 
-import "github.com/igloo1505/ulldCli/cmd"
+import "github.com/Uh-little-less-dum/cli/cmd"
 
 func main() {
 	cmd.Execute()

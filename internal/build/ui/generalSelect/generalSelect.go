@@ -1,8 +1,8 @@
 package general_select
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -19,13 +19,19 @@ var (
 				Padding(0, 0, 0, 1)
 )
 
-type item struct {
+type Item struct {
 	title, desc string
 }
 
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.title }
+func (i Item) Title() string { return i.title }
+func (i *Item) SetTitle(newTitle string) {
+	i.title = newTitle
+}
+func (i Item) Description() string { return i.desc }
+func (i *Item) SetDescription(newDesc string) {
+	i.desc = newDesc
+}
+func (i Item) FilterValue() string { return i.title }
 
 type listKeyMap struct {
 	toggleSpinner    key.Binding
@@ -165,7 +171,7 @@ func (m Model) View() string {
 func getListItems(opts []string) []list.Item {
 	var items []list.Item
 	for _, s := range opts {
-		items = append(items, item{title: s, desc: s})
+		items = append(items, Item{title: s, desc: s})
 	}
 	return items
 }

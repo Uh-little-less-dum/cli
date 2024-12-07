@@ -1,19 +1,19 @@
 package mainBuildModel
 
 import (
-	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	choose_wait_or_pick_config_loc "github.com/igloo1505/ulldCli/internal/build/ui/chooseWaitOrPickConfigLoc"
-	clone_template_app "github.com/igloo1505/ulldCli/internal/build/ui/cloneTemplateApp"
-	confirm_config_dir_loc "github.com/igloo1505/ulldCli/internal/build/ui/confirmConfigDirLoc"
-	"github.com/igloo1505/ulldCli/internal/build/ui/confirmdir"
-	"github.com/igloo1505/ulldCli/internal/build/ui/filepicker"
-	general_confirm "github.com/igloo1505/ulldCli/internal/build/ui/generalConfirm"
-	general_select_with_desc "github.com/igloo1505/ulldCli/internal/build/ui/generalSelectWithDesc"
-	stage_gather_config_location "github.com/igloo1505/ulldCli/internal/buildScript/stages/gather_config_location"
-	"github.com/igloo1505/ulldCli/internal/keymap"
-	"github.com/igloo1505/ulldCli/internal/signals"
-	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
+	buildConfig "github.com/Uh-little-less-dum/cli/internal/build/config"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	choose_wait_or_pick_config_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/chooseWaitOrPickConfigLoc"
+	clone_template_app "github.com/Uh-little-less-dum/cli/internal/build/ui/cloneTemplateApp"
+	confirm_config_dir_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/confirmConfigDirLoc"
+	"github.com/Uh-little-less-dum/cli/internal/build/ui/confirmdir"
+	"github.com/Uh-little-less-dum/cli/internal/build/ui/filepicker"
+	general_confirm "github.com/Uh-little-less-dum/cli/internal/build/ui/generalConfirm"
+	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
+	build_stage_utils "github.com/Uh-little-less-dum/cli/internal/buildStageManagement"
+	"github.com/Uh-little-less-dum/cli/internal/keymap"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
+	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
 	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -64,20 +64,21 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.confirmConfigLocEnv.SetDescription(viper.GetViper().GetString("appConfigPath"))
 			// m.confirmConfigLocEnv = confirm_config_dir_loc.NewModel() // Required to re-read viper based description.
 		}
-		m.stage = msg.NewStage
 		m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
 		cmds = append(cmds, cmd)
+	// This runs when the filepicker model selects a filepath.
 	case signals.SetAcceptedTargetDirMsg:
 		m.targetDir = msg.TargetDir
 		v := viper.GetViper()
 		v.Set("targetDir", msg.TargetDir)
-		_, newStage := stage_gather_config_location.GetNextBuildStage()
+		_, newStage := build_stage_utils.GetNextBuildStage()
 		cmd := signals.SetStage(newStage)
 		cmds = append(cmds, cmd)
 		return m, tea.Batch(cmds...)
+	// This runs when the selected filepath is confirmed or rejected.
 	case signals.SetUseSelectedDirMsg:
 		if msg.UseSelectedDir {
-			_, newStage := stage_gather_config_location.GetNextBuildStage()
+			_, newStage := build_stage_utils.GetNextBuildStage()
 			cmd = signals.SetStage(newStage)
 		} else {
 			cmd = signals.SetStage(constants.PickTargetDirStage)
@@ -148,7 +149,7 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 	}
 
 	val := mainModel{
-		stage:                     cfg.InitialStage,
+		stage:                     cfg.InitialStage(),
 		help:                      help.New(),
 		targetDirModel:            filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?", constants.PickTargetDirStage),
 		confirmDirModel:           confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
@@ -156,7 +157,7 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(),
 		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
 		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", constants.PickConfigLoc),
-		targetDir:                 cfg.TargetDir,
+		targetDir:                 cfg.TargetDir(),
 		quitting:                  false,
 	}
 

@@ -2,9 +2,9 @@ package choose_wait_or_pick_config_loc
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	general_select_with_desc "github.com/igloo1505/ulldCli/internal/build/ui/generalSelectWithDesc"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
 )
 
 const (

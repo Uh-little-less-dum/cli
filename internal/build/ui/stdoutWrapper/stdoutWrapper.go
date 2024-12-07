@@ -5,10 +5,23 @@ import (
 	"io"
 	"os/exec"
 
+	"github.com/Uh-little-less-dum/cli/internal/signals"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	"github.com/charmbracelet/log"
 )
+
+type keymap struct {
+	Quit key.Binding
+}
+
+var Keymap = keymap{
+	Quit: key.NewBinding(
+		key.WithKeys("ctrl+c", "q"),
+		key.WithHelp("ctrl+c/q", "quit"),
+	),
+}
 
 const viewportHeight = 8
 
@@ -72,22 +85,23 @@ func NewModel(initialString string) Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(ping("charm.sh", m.sub), waitForPingResponses(m.sub))
+	// return tea.Batch(ping("charm.sh", m.sub), waitForPingResponses(m.sub))
+	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.viewport.Width = msg.Width
 		return m, nil
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c", "esc":
+		switch {
+		case key.Matches(msg, Keymap.Quit):
 			return m, tea.Quit
 		}
 	case signals.StdOutWrapperOutputMsg:
+		log.Fatal("Body: ", msg.Body)
 		m.appendOutput(string(msg.Body))
 		cmds = append(cmds, waitForPingResponses(m.sub))
 	case outputErrMsg:

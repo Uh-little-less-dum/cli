@@ -1,9 +1,9 @@
 package general_confirm
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
+	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"

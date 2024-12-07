@@ -3,10 +3,10 @@ package filepicker
 import (
 	"path"
 
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
-	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
+	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
+	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"

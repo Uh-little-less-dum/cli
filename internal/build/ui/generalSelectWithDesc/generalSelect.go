@@ -1,9 +1,8 @@
 package general_select_with_desc
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
-
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

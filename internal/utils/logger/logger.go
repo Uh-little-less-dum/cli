@@ -3,7 +3,7 @@ package logger
 import (
 	"time"
 
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

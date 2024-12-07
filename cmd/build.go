@@ -1,30 +1,12 @@
 package cmd
 
 import (
-	"os"
+	"github.com/Uh-little-less-dum/cli/internal/build"
+	command_setup "github.com/Uh-little-less-dum/cli/internal/utils/commandSetup"
+	cli_config "github.com/Uh-little-less-dum/cli/internal/utils/initViper"
 
-	"github.com/igloo1505/ulldCli/internal/build"
-	command_setup "github.com/igloo1505/ulldCli/internal/utils/commandSetup"
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
-
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-func GetDirPath(args []string) string {
-	var dirPath string
-	if len(args) == 1 {
-		dirPath = args[0]
-	} else {
-		dir, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		dirPath = dir
-	}
-	return dirPath
-}
 
 var buildCmd = &cobra.Command{
 	Use:   "build",
@@ -33,16 +15,13 @@ var buildCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		dirPath := GetDirPath(args)
-		if dirPath != "" {
-			viper.GetViper().Set("targetDir", dirPath)
-		}
-		log.Debugf("Proceeding with the initial target directory set to %s", dirPath)
-		build.BuildUlld(cmd, dirPath)
+		build.BuildUlld(cmd, args)
 	},
 }
 
+// RESUME: Implement newly created cli option models through a list that is uniique to each command and a single function that simply accepts the list of flags and the cmd that initializes each command.
 func init() {
-	cobra.OnInitialize(command_setup.InitializeCommand(buildCmd, cli_config.BuildCmdName, ""))
 	RootCmd.AddCommand(buildCmd)
+	command_setup.InitializeCommand(buildCmd, cli_config.BuildCmdName, "")()
+
 }

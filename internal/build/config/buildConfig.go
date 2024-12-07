@@ -3,8 +3,8 @@ package build_config
 import (
 	"os"
 
-	schemas_app_config "github.com/igloo1505/ulldCli/internal/schemastructs/ulldAppConfig"
-	utils_error "github.com/igloo1505/ulldCli/internal/utils/errorHandling"
+	utils_error "github.com/Uh-little-less-dum/cli/internal/utils/errorHandling"
+	schemas_app_config "github.com/Uh-little-less-dum/go-utils/pkg/schemastructs/ulldAppConfig"
 )
 
 type ulldConfig struct {

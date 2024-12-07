@@ -3,7 +3,6 @@
 
 # The lines below are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/need to use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 version: 2
@@ -14,7 +13,7 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 builds:
-  - binary: ulldCli
+  - binary: cli
     env:
       - CGO_ENABLED=0
     goos:
@@ -39,6 +38,7 @@ brews:
       owner: Uh-little-less-dum
       name: homebrew-cli
       branch: main
+      token: "{{ .Env.GORELEASER_GITHUB_TOKEN }}"
     commit_author:
       name: Uh-little-less-dum
       email: uhlittlelessdumb@gmail.com

@@ -1,14 +1,13 @@
-package stage_gather_config_location
+package build_stage_utils
 
 import (
 	"path/filepath"
 
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
+	fs_utils "github.com/Uh-little-less-dum/build/pkg/fs"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
 	"github.com/spf13/viper"
 )
 
-// Should be called just before cloning the app to ensure that a config file can be located.
 func GetNextBuildStage() (configPath string, stage constants.BuildStage) {
 	v := viper.GetViper()
 	configDir := v.GetString("configDir")

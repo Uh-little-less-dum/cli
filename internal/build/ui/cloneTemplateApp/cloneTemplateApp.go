@@ -3,13 +3,14 @@ package clone_template_app
 import (
 	"fmt"
 
+	build_constants "github.com/Uh-little-less-dum/build/pkg/buildConstants"
+	stage_clone_template_app "github.com/Uh-little-less-dum/build/pkg/buildScript/stages/stage_clone_template_app/createTemplateApp/clone"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	stdout_wrapper "github.com/Uh-little-less-dum/cli/internal/build/ui/stdoutWrapper"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	stdout_wrapper "github.com/igloo1505/ulldCli/internal/build/ui/stdoutWrapper"
-	stage_clone_template_app "github.com/igloo1505/ulldCli/internal/buildScript/stages/stage_clone_template_app/createTemplateApp/clone"
-	"github.com/igloo1505/ulldCli/internal/signals"
 	"github.com/spf13/viper"
 )
 
@@ -43,6 +44,9 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// func (m Model) BeginClone() {
+// }
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case signals.SetStageMsg:
@@ -69,7 +73,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return m.outputWrapper.View()
+	// return m.outputWrapper.View()
+	// 	//    c := exec.Command(editor) //nolint:gosec
+	// 	// return tea.ExecProcess(c, func(err error) tea.Msg {
+	// 	// 	return editorFinishedMsg{err}
+	// 	// })
+	return "View here..."
 }
 
 func (m Model) beginSparseClone(targetDir string) {
@@ -79,7 +88,7 @@ func (m Model) beginSparseClone(targetDir string) {
 func NewCloneTemplateAppUIModel() Model {
 	id := "clone-template-app"
 	targetDir := viper.GetViper().GetString("targetDir")
-	initialString := fmt.Sprintf("Cloning %s into %s...", constants.SparseCloneRepoUrl, targetDir)
+	initialString := fmt.Sprintf("Cloning %s into %s...", build_constants.SparseCloneRepoUrl, targetDir)
 	return Model{
 		outputWrapper: stdout_wrapper.NewModel(initialString),
 		Id:            id,

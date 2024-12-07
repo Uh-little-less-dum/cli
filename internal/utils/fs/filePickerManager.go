@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-// RESUME: Come back here and test this thoroughly now that the file picker itself is in working order.
+// TEST: Come back here and test this thoroughly now that the file picker itself is in working order.
 // Implement this: github.com/spf13/afero
 type FilePickerDataType int
 

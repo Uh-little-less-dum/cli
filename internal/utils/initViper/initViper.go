@@ -4,6 +4,9 @@ import (
 	"os"
 	"path"
 
+	flag_strings "github.com/Uh-little-less-dum/cli/internal/build/constants/flagStrings"
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
+	"github.com/Uh-little-less-dum/cli/internal/flag"
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -93,10 +96,13 @@ func (v *ViperWrapper) setConfigDefaults() {
 }
 
 // Sets all cobra flags and binds them to viper.
-func (v *ViperWrapper) setFlags(cmd *cobra.Command) {
+func (v *ViperWrapper) setFlags(cmd *cobra.Command, cmdOptions []flag.CmdOption) {
+	for _, o := range cmdOptions {
+		o.Init(cmd)
+	}
 	// Log File
-	cmd.Flags().StringP("logFile", "l", "", "Log output to this file. Useful for build failures and other local development.")
-	err := v.viper.BindPFlag("logFile", cmd.Flags().Lookup("logFile"))
+	cmd.Flags().StringP(string(flag_strings.LogFilePath), "l", "", "Log output to this file. Useful for build failures and other local development.")
+	err := v.viper.BindPFlag(string(viper_keys.LogFilePath), cmd.Flags().Lookup(string(flag_strings.LogFilePath)))
 	handleErr(err)
 
 	// Log Level
@@ -136,9 +142,20 @@ func (v *ViperWrapper) Init(cmd *cobra.Command) {
 }
 
 func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
-	v.viper.SetDefault("timeout", 30)
-	cmd.Flags().Int("timeout", 30, "Log level")
-	err := v.viper.BindPFlag("timeout", cmd.Flags().Lookup("timeout"))
+	// Timeout flag
+	v.viper.SetDefault(string(viper_keys.CloneTimeout), 30)
+	cmd.Flags().Int(string(flag_strings.CloneTimeout), 30, "Log level")
+	err := v.viper.BindPFlag(string(viper_keys.CloneTimeout), cmd.Flags().Lookup(string(flag_strings.CloneTimeout)))
+	handleErr(err)
+
+	// Bypass location select flag
+	cmd.Flags().Bool(string(flag_strings.Here), false, "Bypass the directory selection input and use the current working directory.")
+	err = v.viper.BindPFlag(string(viper_keys.UseCwd), cmd.Flags().Lookup(string(flag_strings.Here)))
+	handleErr(err)
+
+	// appConfig.ulld.json path.
+	cmd.Flags().StringP(string(flag_strings.AppConfigPath), "a", "", "Bypass the file path select menu and use this path for your appConfig.ulld.json source.")
+	err = v.viper.BindPFlag(string(viper_keys.AppConfigPath), cmd.Flags().Lookup(string(flag_strings.AppConfigPath)))
 	handleErr(err)
 }
 

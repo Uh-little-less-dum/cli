@@ -1,9 +1,9 @@
 package confirm_config_dir_loc
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	general_confirm "github.com/igloo1505/ulldCli/internal/build/ui/generalConfirm"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	general_confirm "github.com/Uh-little-less-dum/cli/internal/build/ui/generalConfirm"
+	"github.com/Uh-little-less-dum/cli/internal/signals"
 	"github.com/spf13/viper"
 )
 
