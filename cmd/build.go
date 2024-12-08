@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/Uh-little-less-dum/cli/internal/build"
+	cmd_options "github.com/Uh-little-less-dum/cli/internal/cmdOptions"
 	command_setup "github.com/Uh-little-less-dum/cli/internal/utils/commandSetup"
-	cli_config "github.com/Uh-little-less-dum/cli/internal/utils/initViper"
 
 	"github.com/spf13/cobra"
 )
@@ -19,9 +19,7 @@ var buildCmd = &cobra.Command{
 	},
 }
 
-// RESUME: Implement newly created cli option models through a list that is uniique to each command and a single function that simply accepts the list of flags and the cmd that initializes each command.
 func init() {
 	RootCmd.AddCommand(buildCmd)
-	command_setup.InitializeCommand(buildCmd, cli_config.BuildCmdName, "")()
-
+	command_setup.InitializeCommand(buildCmd, cmd_options.GetBuildCommandOptions())()
 }

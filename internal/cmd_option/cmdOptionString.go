@@ -1,40 +1,37 @@
 package cmd_option
 
-import "github.com/spf13/cobra"
+import (
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
+	"github.com/charmbracelet/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
 
 type CmdOptionString struct {
-	viperKey     string
-	flagString   string
-	shortHand    string
-	defaultValue string
-	usageString  string
+	ViperKey     viper_keys.ViperKey
+	FlagString   string
+	ShortHand    string
+	DefaultValue string
+	UsageString  string
+	EnvVar       string
 }
 
-func (c CmdOptionString) ViperKey() (_ string) {
-	return c.viperKey
-}
-
-func (c CmdOptionString) DefaultVal() (_ string) {
-	return c.defaultValue
-}
-
-func (c CmdOptionString) FlagString() (_ string) {
-	return c.flagString
-}
-
-func (c CmdOptionString) Shorthand() (_ string) {
-	return c.shortHand
-}
-
-func (c CmdOptionString) Usage() (_ string) {
-	return c.usageString
-}
-
-// RESUME: Come back here and implement this Init field in each of the different CmdOption models, then set all available flags as an array of CmdOption models before reworking the build init methods to generate cobra stuff from that list alone.
-func (c CmdOptionString) Init(cmd *cobra.Command) {
-	if c.shortHand == "" {
-		cmd.Flags().String(c.flagString, c.defaultValue, c.usageString)
+func (c CmdOptionString) Init(cmd *cobra.Command, v *viper.Viper) {
+	if c.EnvVar != "" {
+		err := v.BindEnv(string(c.ViperKey), c.EnvVar)
+		handleErr(err)
+	}
+	if c.DefaultValue != "" {
+		v.SetDefault(string(c.ViperKey), c.DefaultValue)
+	}
+	if c.ShortHand == "" {
+		cmd.Flags().String(c.FlagString, c.DefaultValue, c.UsageString)
 	} else {
-		cmd.Flags().StringP(c.flagString, c.shortHand, c.defaultValue, c.usageString)
+		cmd.Flags().StringP(c.FlagString, c.ShortHand, c.DefaultValue, c.UsageString)
+	}
+
+	err := v.BindPFlag(string(c.ViperKey), cmd.Flags().Lookup(c.FlagString))
+	if err != nil {
+		log.Fatal(err)
 	}
 }

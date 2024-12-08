@@ -1,39 +1,38 @@
 package cmd_option
 
-import "github.com/spf13/cobra"
+import (
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
+	"github.com/charmbracelet/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
 
 type CmdOptionFloat struct {
-	viperKey     string
-	flagString   string
-	shortHand    string
-	defaultValue float32
-	usageString  string
+	ViperKey     viper_keys.ViperKey
+	FlagString   string
+	ShortHand    string
+	DefaultValue string
+	UsageString  string
+	EnvVar       string
 }
 
-func (c CmdOptionFloat) ViperKey() (_ string) {
-	return c.viperKey
-}
-
-func (c CmdOptionFloat) DefaultVal() (_ float32) {
-	return c.defaultValue
-}
-
-func (c CmdOptionFloat) FlagString() (_ string) {
-	return c.flagString
-}
-
-func (c CmdOptionFloat) Shorthand() (_ string) {
-	return c.shortHand
-}
-
-func (c CmdOptionFloat) Usage() (_ string) {
-	return c.usageString
-}
-
-func (c CmdOptionFloat) Init(cmd *cobra.Command) {
-	if c.shortHand == "" {
-		cmd.Flags().Float32(c.flagString, c.defaultValue, c.usageString)
+func (c CmdOptionFloat) Init(cmd *cobra.Command, v *viper.Viper) {
+	if c.DefaultValue != "" {
+		v.SetDefault(string(c.ViperKey), c.DefaultValue)
+	}
+	if c.ShortHand == "" {
+		cmd.Flags().String(c.FlagString, c.DefaultValue, c.UsageString)
 	} else {
-		cmd.Flags().Float32P(c.flagString, c.shortHand, c.defaultValue, c.usageString)
+		cmd.Flags().StringP(c.FlagString, c.ShortHand, c.DefaultValue, c.UsageString)
+	}
+
+	err := v.BindPFlag(string(c.ViperKey), cmd.Flags().Lookup(c.FlagString))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if c.EnvVar != "" {
+		err = v.BindEnv(string(c.ViperKey), c.EnvVar)
+		handleErr(err)
 	}
 }

@@ -5,13 +5,14 @@ import (
 
 	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 )
 
-func Build(args []string, b *build_config.BuildConfigOpts) {
+func Build(args []string, b *build_config.BuildManager) {
 	v := viper.GetViper()
-	useCwd := v.GetBool("useCwd")
+	useCwd := v.GetBool(string(viper_keys.UseCwd))
 	var targetDir string
 	if len(args) > 0 {
 		targetDir = args[0]
@@ -29,6 +30,7 @@ func Build(args []string, b *build_config.BuildConfigOpts) {
 		b.AddSkippedStage(constants.ConfirmCurrentDirStage)
 	}
 	if targetDir != "" {
-		b.SetTargetDir(targetDir)
+		b.TargetDir = targetDir
+		// b.SetTargetDir(targetDir)
 	}
 }

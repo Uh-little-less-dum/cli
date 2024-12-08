@@ -2,6 +2,7 @@ package select_package_manager
 
 import (
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	general_select "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelect"
 	"github.com/Uh-little-less-dum/cli/internal/signals"
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,7 +10,7 @@ import (
 )
 
 func sendSetPackageManager(acceptedTitle string) tea.Cmd {
-	viper.GetViper().Set("packageManager", acceptedTitle)
+	viper.GetViper().Set(string(viper_keys.PackageManager), acceptedTitle)
 	return func() tea.Msg {
 		return signals.SetStageMsg{
 			NewStage: constants.InstallTemplateAppDeps,

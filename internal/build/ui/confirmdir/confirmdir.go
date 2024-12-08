@@ -3,10 +3,8 @@ package confirmdir
 import (
 	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
-	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	"github.com/Uh-little-less-dum/cli/internal/signals"
 	cli_styles "github.com/Uh-little-less-dum/go-utils/pkg/styles"
-	"github.com/spf13/viper"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
@@ -20,7 +18,7 @@ type Model struct {
 
 const formKey string = "useCwd"
 
-func NewModel(title string) Model {
+func NewModel(title string, buildManager *build_config.BuildManager) Model {
 	theme := cli_styles.GetHuhTheme()
 	c := huh.NewConfirm().
 		Key(formKey).
@@ -28,10 +26,21 @@ func NewModel(title string) Model {
 		Affirmative("Yup").
 		Negative("No")
 
-	d := viper.GetViper().GetString(string(viper_keys.TargetDirectory))
-	if d != "" {
-		c.Description(d)
+	if buildManager.TargetDir != "" {
+
+		c.Description(buildManager.TargetDir)
 	}
+
+	// d := viper.GetViper().GetString(string(viper_keys.TargetDirectory))
+	// if d != "" {
+	// 	c.Description(d)
+	// } else {
+	// 	cwd, err := os.Getwd()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	c.Description(cwd)
+	// }
 	return Model{
 		form: huh.NewForm(
 			huh.NewGroup(
@@ -49,9 +58,9 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
-	if build_config.IsActiveStage(m.Stage) && build_config.ShouldSkipStage(m.Stage) {
-		return m, signals.SetUseSelectedDir(true)
-	}
+	// if build_config.IsActiveStage(m.Stage) && build_config.ShouldSkipStage(m.Stage) {
+	// 	return m, signals.SetUseSelectedDir(true)
+	// }
 
 	form, cmd := m.form.Update(msg)
 

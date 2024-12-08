@@ -64,10 +64,8 @@ func setStructuredLogger() {
 	}
 }
 
-func InitLogger(prefix string) {
-	// logger := log.New(os.Stderr)
+func InitLogger() {
 	log.SetTimeFormat(time.Kitchen)
-	log.SetPrefix(prefix)
 	ll := viper.Get("logLevel")
 	if ll != nil {
 		logLevel := ll.(log.Level)

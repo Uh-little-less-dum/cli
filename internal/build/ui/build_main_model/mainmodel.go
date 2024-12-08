@@ -1,8 +1,10 @@
-package mainBuildModel
+package build_main_model
 
 import (
 	buildConfig "github.com/Uh-little-less-dum/cli/internal/build/config"
+	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	choose_wait_or_pick_config_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/chooseWaitOrPickConfigLoc"
 	clone_template_app "github.com/Uh-little-less-dum/cli/internal/build/ui/cloneTemplateApp"
 	confirm_config_dir_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/confirmConfigDirLoc"
@@ -34,6 +36,7 @@ type mainModel struct {
 	pickConfigFile            filepicker.Model
 	targetDir                 string
 	quitting                  bool
+	manager                   *build_config.BuildManager
 }
 
 func (m mainModel) Init() tea.Cmd {
@@ -59,10 +62,12 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pickConfigFile, cmd = m.pickConfigFile.Update(msg)
 		cmds = append(cmds, cmd)
 	case signals.SetStageMsg:
+		// WARN: Stages are likely still being modified elsewhere. Fix this to make sure that all modifications to the active stage flow through one function so this can be implemented reliably.
+		m.manager.SetActiveStage(msg.NewStage)
 		// m.confirmConfigLocEnv = confirm_config_dir_loc.NewModel()
 		if msg.NewStage == m.confirmConfigLocEnv.Stage {
-			m.confirmConfigLocEnv.SetDescription(viper.GetViper().GetString("appConfigPath"))
-			// m.confirmConfigLocEnv = confirm_config_dir_loc.NewModel() // Required to re-read viper based description.
+			// m.confirmConfigLocEnv.SetDescription(viper.GetViper().GetString(string(viper_keys.TargetDirectory)))
+			m.confirmConfigLocEnv.SetDescription(m.manager.TargetDir)
 		}
 		m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
 		cmds = append(cmds, cmd)
@@ -70,7 +75,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case signals.SetAcceptedTargetDirMsg:
 		m.targetDir = msg.TargetDir
 		v := viper.GetViper()
-		v.Set("targetDir", msg.TargetDir)
+		v.Set(string(viper_keys.TargetDirectory), msg.TargetDir)
 		_, newStage := build_stage_utils.GetNextBuildStage()
 		cmd := signals.SetStage(newStage)
 		cmds = append(cmds, cmd)
@@ -141,7 +146,7 @@ func (m mainModel) View() string {
 	return s
 }
 
-func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
+func InitialMainModel(cfg *buildConfig.BuildManager) *mainModel {
 	homeDir, err := homedir.Dir()
 
 	if err != nil {
@@ -152,13 +157,14 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 		stage:                     cfg.InitialStage(),
 		help:                      help.New(),
 		targetDirModel:            filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?", constants.PickTargetDirStage),
-		confirmDirModel:           confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
+		confirmDirModel:           confirmdir.NewModel("Do you want to build ULLD in your selected directory?", cfg),
 		cloneTemplateAppModel:     clone_template_app.NewCloneTemplateAppUIModel(),
 		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(),
 		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
 		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", constants.PickConfigLoc),
-		targetDir:                 cfg.TargetDir(),
+		targetDir:                 cfg.TargetDir,
 		quitting:                  false,
+		manager:                   cfg,
 	}
 
 	return &val

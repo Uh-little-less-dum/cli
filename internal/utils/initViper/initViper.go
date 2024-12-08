@@ -4,9 +4,8 @@ import (
 	"os"
 	"path"
 
-	flag_strings "github.com/Uh-little-less-dum/cli/internal/build/constants/flagStrings"
 	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
-	"github.com/Uh-little-less-dum/cli/internal/flag"
+	"github.com/Uh-little-less-dum/cli/internal/cmd_option"
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -78,7 +77,7 @@ func (v *ViperWrapper) readConfig() {
 	if cfgFile != "" {
 		dirPath := path.Dir(cfgFile)
 		if dirPath != "" {
-			v.viper.Set("configDir", dirPath)
+			v.viper.Set(string(viper_keys.ConfigDir), dirPath)
 		}
 	}
 }
@@ -96,26 +95,17 @@ func (v *ViperWrapper) setConfigDefaults() {
 }
 
 // Sets all cobra flags and binds them to viper.
-func (v *ViperWrapper) setFlags(cmd *cobra.Command, cmdOptions []flag.CmdOption) {
+func (v *ViperWrapper) setFlags(cmd *cobra.Command, cmdOptions []cmd_option.CmdOption) {
 	for _, o := range cmdOptions {
-		o.Init(cmd)
+		o.Init(cmd, v.viper)
 	}
-	// Log File
-	cmd.Flags().StringP(string(flag_strings.LogFilePath), "l", "", "Log output to this file. Useful for build failures and other local development.")
-	err := v.viper.BindPFlag(string(viper_keys.LogFilePath), cmd.Flags().Lookup(string(flag_strings.LogFilePath)))
-	handleErr(err)
-
-	// Log Level
-	cmd.Flags().String("logLevel", "info", "Log level")
-	err = v.viper.BindEnv("logLevel", "ULLD_LOG_LEVEL")
-	handleErr(err)
-	err = v.viper.BindPFlag("logLevel", cmd.Flags().Lookup("logLevel"))
-	handleErr(err)
 }
 
 func (v *ViperWrapper) applyLogLevel() {
 
-	llString := v.viper.GetString("logLevel")
+	// llString := cmp.Or(v.viper.GetString(string(viper_keys.LogLevel)), "info")
+
+	llString := v.viper.GetString(string(viper_keys.LogLevel))
 
 	if llString != "" {
 		parsedLevel, err := log.ParseLevel(llString)
@@ -127,45 +117,23 @@ func (v *ViperWrapper) applyLogLevel() {
 	}
 }
 
-func (v *ViperWrapper) Init(cmd *cobra.Command) {
+func (v *ViperWrapper) Init(cmd *cobra.Command, opts []cmd_option.CmdOption) {
 	v.viper = viper.GetViper()
 
 	v.setConfigDefaults()
 	v.setConfigPaths(cmd)
 
 	v.viper.AutomaticEnv()
-	v.setFlags(cmd)
+	v.setFlags(cmd, opts)
 
 	v.readConfig()
 
 	v.applyLogLevel()
 }
 
-func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
-	// Timeout flag
-	v.viper.SetDefault(string(viper_keys.CloneTimeout), 30)
-	cmd.Flags().Int(string(flag_strings.CloneTimeout), 30, "Log level")
-	err := v.viper.BindPFlag(string(viper_keys.CloneTimeout), cmd.Flags().Lookup(string(flag_strings.CloneTimeout)))
-	handleErr(err)
-
-	// Bypass location select flag
-	cmd.Flags().Bool(string(flag_strings.Here), false, "Bypass the directory selection input and use the current working directory.")
-	err = v.viper.BindPFlag(string(viper_keys.UseCwd), cmd.Flags().Lookup(string(flag_strings.Here)))
-	handleErr(err)
-
-	// appConfig.ulld.json path.
-	cmd.Flags().StringP(string(flag_strings.AppConfigPath), "a", "", "Bypass the file path select menu and use this path for your appConfig.ulld.json source.")
-	err = v.viper.BindPFlag(string(viper_keys.AppConfigPath), cmd.Flags().Lookup(string(flag_strings.AppConfigPath)))
-	handleErr(err)
-}
-
-func InitViper(cmd *cobra.Command, buildName CommandName) func() {
+func InitViper(cmd *cobra.Command, cmdOpts []cmd_option.CmdOption) func() {
 	return func() {
 		var v = ViperWrapper{}
-		v.Init(cmd)
-		switch buildName {
-		case BuildCmdName:
-			v.InitBuildCmd(cmd)
-		}
+		v.Init(cmd, cmdOpts)
 	}
 }
