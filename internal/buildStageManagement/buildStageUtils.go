@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	fs_utils "github.com/Uh-little-less-dum/build/pkg/fs"
+	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
 	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	"github.com/spf13/viper"
@@ -12,10 +13,13 @@ import (
 func GetNextBuildStage() (configPath string, stage constants.BuildStage) {
 	v := viper.GetViper()
 	configDir := v.GetString(string(viper_keys.ConfigDir))
+	b := build_config.GetBuildManager()
 	if configDir != "" {
 		configPath := filepath.Join(configDir, "appConfig.ulld.json")
 		if fs_utils.Exists(configPath) {
-			v.Set(string(viper_keys.AppConfigPath), configPath)
+			if b.ConfigDirPath == "" {
+				b.ConfigDirPath = configPath
+			}
 			return configPath, constants.ConfirmConfigLocFromEnv
 		} else {
 			return "", constants.ChooseWaitOrPickConfigLoc

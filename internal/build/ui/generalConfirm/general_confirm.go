@@ -18,8 +18,8 @@ type Model struct {
 	Stage       constants.BuildStage
 	confirm     *huh.Confirm
 	Description string
-	OnResponse  OnResponseFunc
 	Value       *bool
+	OnResponse  OnResponseFunc
 }
 
 func NewModel(title, desc string, onResponse OnResponseFunc, stage constants.BuildStage) Model {

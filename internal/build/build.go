@@ -1,7 +1,6 @@
 package build
 
 import (
-	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	mainBuildModel "github.com/Uh-little-less-dum/cli/internal/build/ui/build_main_model"
 	cmd_init "github.com/Uh-little-less-dum/cli/internal/cmdInit"
 
@@ -10,9 +9,8 @@ import (
 )
 
 func BuildUlld(cmd *cobra.Command, args []string) {
-	cfg := build_config.GetBuildManager()
-	cmd_init.Build(args, cfg)
-	cfg.Init()
+	cfg := cmd_init.Build(args)
+	cfg.Init(args)
 	mm := mainBuildModel.InitialMainModel(cfg)
 
 	tp := tea.NewProgram(mm, tea.WithAltScreen())

@@ -7,7 +7,7 @@ import (
 	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	choose_wait_or_pick_config_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/chooseWaitOrPickConfigLoc"
 	clone_template_app "github.com/Uh-little-less-dum/cli/internal/build/ui/cloneTemplateApp"
-	confirm_config_dir_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/confirmConfigDirLoc"
+	confirm_config_dir_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/confirm_app_config_loc"
 	"github.com/Uh-little-less-dum/cli/internal/build/ui/confirmdir"
 	"github.com/Uh-little-less-dum/cli/internal/build/ui/filepicker"
 	general_confirm "github.com/Uh-little-less-dum/cli/internal/build/ui/generalConfirm"
@@ -26,7 +26,6 @@ import (
 )
 
 type mainModel struct {
-	stage                     constants.BuildStage
 	help                      help.Model
 	confirmDirModel           confirmdir.Model
 	targetDirModel            filepicker.Model
@@ -61,13 +60,15 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 		m.pickConfigFile, cmd = m.pickConfigFile.Update(msg)
 		cmds = append(cmds, cmd)
+	// TODO: ToPreviousStageMsg completely untested. Need to implement the keymap in each model to make it work.
+	case signals.ToPreviousStageMsg:
+		cmd = m.manager.SendToPreviousStageMsg()
+		return m, cmd
 	case signals.SetStageMsg:
 		// WARN: Stages are likely still being modified elsewhere. Fix this to make sure that all modifications to the active stage flow through one function so this can be implemented reliably.
-		m.manager.SetActiveStage(msg.NewStage)
-		// m.confirmConfigLocEnv = confirm_config_dir_loc.NewModel()
+		build_config.SetActiveStage(msg.NewStage)
 		if msg.NewStage == m.confirmConfigLocEnv.Stage {
-			// m.confirmConfigLocEnv.SetDescription(viper.GetViper().GetString(string(viper_keys.TargetDirectory)))
-			m.confirmConfigLocEnv.SetDescription(m.manager.TargetDir)
+			m.confirmConfigLocEnv.SetDescription(m.manager.ConfigDirPath)
 		}
 		m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
 		cmds = append(cmds, cmd)
@@ -100,7 +101,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	switch m.stage {
+	switch m.manager.Stage() {
 	case m.confirmDirModel.Stage:
 		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
 		cmds = append(cmds, cmd)
@@ -129,7 +130,7 @@ func (m mainModel) View() string {
 	if m.quitting {
 		return "\n  No worries.\n\n"
 	}
-	switch m.stage {
+	switch m.manager.Stage() {
 	case m.confirmDirModel.Stage:
 		return m.confirmDirModel.View()
 	case m.targetDirModel.Stage:
@@ -154,12 +155,11 @@ func InitialMainModel(cfg *buildConfig.BuildManager) *mainModel {
 	}
 
 	val := mainModel{
-		stage:                     cfg.InitialStage(),
 		help:                      help.New(),
 		targetDirModel:            filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?", constants.PickTargetDirStage),
 		confirmDirModel:           confirmdir.NewModel("Do you want to build ULLD in your selected directory?", cfg),
 		cloneTemplateAppModel:     clone_template_app.NewCloneTemplateAppUIModel(),
-		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(),
+		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(cfg),
 		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
 		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", constants.PickConfigLoc),
 		targetDir:                 cfg.TargetDir,

@@ -1,7 +1,7 @@
 package cmd_init
 
 import (
-	"os"
+	"path/filepath"
 
 	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
@@ -10,27 +10,25 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Build(args []string, b *build_config.BuildManager) {
+func Build(args []string) *build_config.BuildManager {
+	b := build_config.GetBuildManager()
 	v := viper.GetViper()
-	useCwd := v.GetBool(string(viper_keys.UseCwd))
 	var targetDir string
 	if len(args) > 0 {
 		targetDir = args[0]
+		absPath, err := filepath.Abs(targetDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+		b.TargetDir = absPath
 	}
+	useCwd := v.GetBool(string(viper_keys.UseCwd))
 	if (targetDir != "") && (useCwd) {
 		log.Fatal("Cannot provide both the `--here` flag and a positional argument. That indicates that you would like to use 2 separate paths for the same process.")
 	}
 	if useCwd {
-		cwd, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		targetDir = cwd
 		b.AddSkippedStage(constants.PickTargetDirStage)
 		b.AddSkippedStage(constants.ConfirmCurrentDirStage)
 	}
-	if targetDir != "" {
-		b.TargetDir = targetDir
-		// b.SetTargetDir(targetDir)
-	}
+	return b
 }

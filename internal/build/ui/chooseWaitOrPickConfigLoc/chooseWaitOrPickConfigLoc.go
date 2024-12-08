@@ -1,10 +1,10 @@
 package choose_wait_or_pick_config_loc
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
 	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
 	"github.com/Uh-little-less-dum/cli/internal/signals"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
@@ -40,6 +40,8 @@ func NewModel() general_select_with_desc.Model {
 		waitForClone,
 	}
 
-	m := general_select_with_desc.NewModel(opts, "How would you like to proceed?", sendConfigLocMethod_handlePickOrWait, constants.ChooseWaitOrPickConfigLoc)
+	m := general_select_with_desc.NewModel(opts, "How would you like to proceed?", sendConfigLocMethod_handlePickOrWait, constants.ChooseWaitOrPickConfigLoc, []general_select_with_desc.WithListConfigFunc{
+		general_select_with_desc.WithStatusHidden,
+	})
 	return m
 }

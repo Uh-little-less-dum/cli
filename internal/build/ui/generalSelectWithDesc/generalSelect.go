@@ -186,7 +186,9 @@ func getListItems(opts []Item) []list.Item {
 	return items
 }
 
-func NewModel(opts []Item, title string, onAccept OnAcceptFunc, stage constants.BuildStage) Model {
+type WithListConfigFunc func(l *list.Model)
+
+func NewModel(opts []Item, title string, onAccept OnAcceptFunc, stage constants.BuildStage, withConfigOpts []WithListConfigFunc) Model {
 	items := getListItems(opts)
 	delegateKeys := newDelegateKeyMap()
 	delegate := newItemDelegate(delegateKeys, onAccept)
@@ -198,6 +200,9 @@ func NewModel(opts []Item, title string, onAccept OnAcceptFunc, stage constants.
 	list := list.New(items, delegate, 0, 0)
 	list.Styles.Title = cli_styles.TitleStyle
 	list.Title = title
+	for _, f := range withConfigOpts {
+		f(&list)
+	}
 	list.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			listKeys.enterItem,

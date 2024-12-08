@@ -81,6 +81,15 @@ func SendConfigLocMethod_WaitForClone() tea.Cmd {
 	}
 }
 
+type ToPreviousStageMsg struct {
+}
+
+func SendToPreviousStageMsg() tea.Cmd {
+	return func() tea.Msg {
+		return ToPreviousStageMsg{}
+	}
+}
+
 type SetConfigLocMethod_pickFile struct {
 }
 

@@ -13,11 +13,9 @@ type Model struct {
 	keys       keyMap.KeyMap
 	help       help.Model
 	inputStyle lipgloss.Style
-	lastKey    string
 	quitting   bool
 }
 
-// TODO: Come back here tomorrow first thing and implement this model, attach a KeyMap object to each model, and create a SetKeys method here to update the keys each time the active model changes.
 func NewModel(keys keyMap.KeyMap) Model {
 	return Model{
 		keys:       keys,
