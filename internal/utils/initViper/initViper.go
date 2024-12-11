@@ -4,8 +4,8 @@ import (
 	"os"
 	"path"
 
-	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	"github.com/Uh-little-less-dum/cli/internal/cmd_option"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"

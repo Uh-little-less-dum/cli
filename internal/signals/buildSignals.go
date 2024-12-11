@@ -114,3 +114,37 @@ func SendUseEnvConfigResponse(wasAccepted bool) tea.Cmd {
 		}
 	}
 }
+
+type BeginInitialTemplateCloneMsg struct {
+	TargetDir string
+}
+
+// func openEditor() tea.Cmd {
+// 	c := exec.Command(editor) //nolint:gosec
+// 	return tea.ExecProcess(c, func(err error) tea.Msg {
+// 		return editorFinishedMsg{err}
+// 	})
+// }
+
+func SendBeginInitialTemplateCloneMsg(targetDir string) tea.Cmd {
+	return func() tea.Msg {
+		return BeginInitialTemplateCloneMsg{
+			TargetDir: targetDir,
+		}
+	}
+}
+
+// func SendBeginInitialTemplateCloneMsg(targetDir string) tea.Cmd {
+// 	return func() tea.Msg {
+// 		return BeginInitialTemplateCloneMsg{
+// 			TargetDir: targetDir,
+// 		}
+// 	}
+// }
+
+type FinishInitialTemplateCloneMsg struct {
+}
+
+func SendFinishInitialTemplateCloneMsg() tea.Msg {
+	return FinishInitialTemplateCloneMsg{}
+}

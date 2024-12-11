@@ -5,10 +5,13 @@
             "name": "Ulld Build Cmd",
             "type": "go",
             "request": "launch",
+            "mode": "auto",
             "program": "${workspaceFolder}/main.go",
             "args": [
                 "build",
-                "--here"
+                "--here",
+                "--appConfig",
+                "/Users/bigsexy/dev-utils/ulld/appConfig.ulld.json"
             ]
         }
     ]

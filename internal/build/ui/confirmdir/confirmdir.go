@@ -27,20 +27,8 @@ func NewModel(title string, buildManager *build_config.BuildManager) Model {
 		Negative("No")
 
 	if buildManager.TargetDir != "" {
-
 		c.Description(buildManager.TargetDir)
 	}
-
-	// d := viper.GetViper().GetString(string(viper_keys.TargetDirectory))
-	// if d != "" {
-	// 	c.Description(d)
-	// } else {
-	// 	cwd, err := os.Getwd()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	c.Description(cwd)
-	// }
 	return Model{
 		form: huh.NewForm(
 			huh.NewGroup(

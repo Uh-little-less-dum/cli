@@ -1,6 +1,5 @@
 /*
 Copyright © 2024 Andrew Mueller aiglinski414@gmail.com
-
 */
 
 package main

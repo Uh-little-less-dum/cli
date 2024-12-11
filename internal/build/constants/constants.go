@@ -12,4 +12,5 @@ const (
 	ChooseWaitOrPickConfigLoc
 	CloneTemplateAppStage
 	InstallTemplateAppDeps
+	PreConflictResolveBuildStream
 )

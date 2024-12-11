@@ -1,8 +1,8 @@
 package cmd_options
 
 import (
-	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	"github.com/Uh-little-less-dum/cli/internal/cmd_option"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 )
 
 func GetBuildCommandOptions() []cmd_option.CmdOption {
@@ -12,7 +12,7 @@ func GetBuildCommandOptions() []cmd_option.CmdOption {
 			ViperKey:     viper_keys.CloneTimeout,
 			FlagString:   "timeout",
 			ShortHand:    "",
-			DefaultValue: 30,
+			DefaultValue: 180,
 			UsageString:  "Sets the timeout limit in seconds for clone and installation requests.",
 		},
 		// Bypass location select flag

@@ -5,7 +5,7 @@ import (
 
 	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
-	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/viper"
 )

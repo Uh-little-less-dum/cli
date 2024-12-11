@@ -1,10 +1,10 @@
 package build_main_model
 
 import (
+	build_stream "github.com/Uh-little-less-dum/cli/internal/build/buildStream"
 	buildConfig "github.com/Uh-little-less-dum/cli/internal/build/config"
 	build_config "github.com/Uh-little-less-dum/cli/internal/build/config"
 	"github.com/Uh-little-less-dum/cli/internal/build/constants"
-	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
 	choose_wait_or_pick_config_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/chooseWaitOrPickConfigLoc"
 	clone_template_app "github.com/Uh-little-less-dum/cli/internal/build/ui/cloneTemplateApp"
 	confirm_config_dir_loc "github.com/Uh-little-less-dum/cli/internal/build/ui/confirm_app_config_loc"
@@ -16,6 +16,7 @@ import (
 	"github.com/Uh-little-less-dum/cli/internal/keymap"
 	"github.com/Uh-little-less-dum/cli/internal/signals"
 	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -33,6 +34,7 @@ type mainModel struct {
 	cloneTemplateAppModel     clone_template_app.Model
 	chooseWaitOrPickConfigLoc general_select_with_desc.Model
 	pickConfigFile            filepicker.Model
+	buildStream               build_stream.Model
 	targetDir                 string
 	quitting                  bool
 	manager                   *build_config.BuildManager
@@ -77,6 +79,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.targetDir = msg.TargetDir
 		v := viper.GetViper()
 		v.Set(string(viper_keys.TargetDirectory), msg.TargetDir)
+		build_config.GetBuildManager().TargetDir = msg.TargetDir
 		_, newStage := build_stage_utils.GetNextBuildStage()
 		cmd := signals.SetStage(newStage)
 		cmds = append(cmds, cmd)
@@ -120,6 +123,9 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case m.chooseWaitOrPickConfigLoc.Stage:
 		m.chooseWaitOrPickConfigLoc, cmd = m.chooseWaitOrPickConfigLoc.Update(msg)
 		cmds = append(cmds, cmd)
+	case m.buildStream.Stage:
+		m.buildStream, cmd = m.buildStream.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	return m, tea.Batch(cmds...)
@@ -143,6 +149,8 @@ func (m mainModel) View() string {
 		return m.chooseWaitOrPickConfigLoc.View()
 	case m.pickConfigFile.Stage:
 		return m.pickConfigFile.View()
+	case m.buildStream.Stage:
+		return m.buildStream.View()
 	}
 	return s
 }
@@ -162,6 +170,7 @@ func InitialMainModel(cfg *buildConfig.BuildManager) *mainModel {
 		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(cfg),
 		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
 		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", constants.PickConfigLoc),
+		buildStream:               build_stream.NewModel(constants.PreConflictResolveBuildStream),
 		targetDir:                 cfg.TargetDir,
 		quitting:                  false,
 		manager:                   cfg,
