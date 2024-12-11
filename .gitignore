@@ -5,7 +5,7 @@ dist/
 cli
 coverage
 dev.log
-msgLog.log
+messageLog.log
 .env.zsh
 ulldCli
 notes

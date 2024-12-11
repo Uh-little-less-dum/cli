@@ -12,8 +12,8 @@ func BuildUlld(cmd *cobra.Command, args []string) {
 	cfg := cmd_init.Build(args)
 	cfg.Init(args)
 	mm := mainBuildModel.InitialMainModel(cfg)
-
 	tp := tea.NewProgram(mm, tea.WithAltScreen())
+	mm.ApplyProgramProp(tp)
 	if _, err := tp.Run(); err != nil {
 		cobra.CheckErr(err)
 	}

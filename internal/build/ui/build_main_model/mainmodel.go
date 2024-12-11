@@ -16,6 +16,7 @@ import (
 	"github.com/Uh-little-less-dum/cli/internal/keymap"
 	"github.com/Uh-little-less-dum/cli/internal/signals"
 	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
+	charm_debug "github.com/Uh-little-less-dum/go-utils/pkg/charm/logMessages"
 	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/spf13/viper"
 
@@ -35,6 +36,7 @@ type mainModel struct {
 	chooseWaitOrPickConfigLoc general_select_with_desc.Model
 	pickConfigFile            filepicker.Model
 	buildStream               build_stream.Model
+	Program                   *tea.Program
 	targetDir                 string
 	quitting                  bool
 	manager                   *build_config.BuildManager
@@ -45,7 +47,13 @@ func (m mainModel) Init() tea.Cmd {
 	return nil
 }
 
+func (m *mainModel) ApplyProgramProp(p *tea.Program) {
+	m.Program = p
+	m.cloneTemplateAppModel.Program = p
+}
+
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	charm_debug.LogCharmMessages("/Users/bigsexy/Desktop/Go/projects/ulld/cli/messageLog.log", msg)
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -71,9 +79,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		build_config.SetActiveStage(msg.NewStage)
 		if msg.NewStage == m.confirmConfigLocEnv.Stage {
 			m.confirmConfigLocEnv.SetDescription(m.manager.ConfigDirPath)
+			m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 		}
-		m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
-		cmds = append(cmds, cmd)
 	// This runs when the filepicker model selects a filepath.
 	case signals.SetAcceptedTargetDirMsg:
 		m.targetDir = msg.TargetDir

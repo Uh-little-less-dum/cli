@@ -28,6 +28,7 @@ type Model struct {
 	status  CloneStatus
 	spinner general_spinner.Model
 	sub     chan bool
+	Program *tea.Program
 }
 
 type keymap struct {
@@ -76,9 +77,10 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			if targetDir == "" {
 				log.Fatal("Attempted to build ULLD in an invalid location.")
 			}
+			m.status = Running
 			cmd = signals.SendBeginInitialTemplateCloneMsg(targetDir)
 			cmds = append(cmds, cmd)
-			return m, tea.Batch(cmds...)
+			// return m, tea.Batch(cmds...)
 		}
 	case tea.KeyMsg:
 		switch {
@@ -100,8 +102,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		go func() {
 			defer func() {
 				m.status = Complete
-				m.sub <- true
-				close(m.sub)
+				m.Program.Send(signals.SetStage(constants.PreConflictResolveBuildStream)())
+				// m.sub <- true
+				// close(m.sub)
 			}()
 			stage_clone_template_app.Run(msg.TargetDir)
 		}()
