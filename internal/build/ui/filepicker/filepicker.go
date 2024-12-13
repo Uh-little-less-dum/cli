@@ -3,8 +3,8 @@ package filepicker
 import (
 	"path"
 
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 
@@ -88,7 +88,7 @@ const (
 type Model struct {
 	list          list.Model
 	fsDir         *fs_utils.FSDirectory
-	Stage         constants.BuildStage
+	Stage         build_stages.BuildStage
 	keys          *listKeyMap
 	delegateKeys  *delegateKeyMap
 	state         state
@@ -226,7 +226,7 @@ func getListItems(fsDir *fs_utils.FSDirectory, dirPath string, isInitial bool) [
 	return items
 }
 
-func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title string, stage constants.BuildStage) Model {
+func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title string, stage build_stages.BuildStage) Model {
 	fsDir := fs_utils.FSDirectory{Path: initialDir, DataType: dataType}
 	items := getListItems(&fsDir, initialDir, true)
 	delegateKeys := newDelegateKeyMap()

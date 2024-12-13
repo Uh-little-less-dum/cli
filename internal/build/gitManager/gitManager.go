@@ -4,14 +4,14 @@ import (
 	"io"
 	"time"
 
+	build_constants "github.com/Uh-little-less-dum/build/pkg/buildConstants"
 	"github.com/charmbracelet/log"
 	"github.com/go-git/go-git/v5"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
 )
 
 type GitManager struct {
-	Url        string
-	SparsePath string
+	Url        build_constants.BuildConstant
+	SparsePath build_constants.BuildConstant
 	Directory  string
 	Timeout    time.Duration
 }
@@ -24,7 +24,7 @@ func checkError(err error) {
 
 func (g GitManager) SparseClone(targetDir string, outputManager io.Writer) {
 	r, err := git.PlainClone(g.Directory, false, &git.CloneOptions{
-		URL:        g.Url,
+		URL:        string(g.Url),
 		NoCheckout: true,
 		Progress:   outputManager,
 	})
@@ -38,7 +38,7 @@ func (g GitManager) SparseClone(targetDir string, outputManager io.Writer) {
 	checkError(err)
 
 	err = w.Checkout(&git.CheckoutOptions{
-		SparseCheckoutDirectories: []string{g.SparsePath},
+		SparseCheckoutDirectories: []string{string(g.SparsePath)},
 	})
 	checkError(err)
 }
@@ -58,8 +58,8 @@ func (g GitManager) SparseClone(targetDir string, outputManager io.Writer) {
 
 func NewTemplateAppGitManager(targetDirectory string, timeout time.Duration) GitManager {
 	return GitManager{
-		Url:        constants.SparseCloneRepoUrl,
-		SparsePath: constants.SparseCloneSparsePath,
+		Url:        build_constants.SparseCloneRepoUrl,
+		SparsePath: build_constants.SparseCloneSparsePath,
 		Directory:  targetDirectory,
 		Timeout:    timeout,
 	}

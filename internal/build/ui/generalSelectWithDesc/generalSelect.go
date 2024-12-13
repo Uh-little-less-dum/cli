@@ -1,7 +1,7 @@
 package general_select_with_desc
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -81,7 +81,7 @@ const (
 
 type Model struct {
 	list          list.Model
-	Stage         constants.BuildStage
+	Stage         build_stages.BuildStage
 	keys          *listKeyMap
 	delegateKeys  *delegateKeyMap
 	state         state
@@ -187,7 +187,7 @@ func getListItems(opts []Item) []list.Item {
 	return items
 }
 
-func NewModel(opts []Item, title string, onAccept OnAcceptFunc, stage constants.BuildStage) Model {
+func NewModel(opts []Item, title string, onAccept OnAcceptFunc, stage build_stages.BuildStage) Model {
 	items := getListItems(opts)
 	delegateKeys := newDelegateKeyMap()
 	delegate := newItemDelegate(delegateKeys, onAccept)

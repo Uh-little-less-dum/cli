@@ -1,7 +1,7 @@
 package build
 
 import (
-	build_config "github.com/igloo1505/ulldCli/internal/build/config"
+	build_config "github.com/Uh-little-less-dum/go-utils/pkg/config"
 	mainBuildModel "github.com/igloo1505/ulldCli/internal/build/ui/mainmodel"
 
 	tea "github.com/charmbracelet/bubbletea"

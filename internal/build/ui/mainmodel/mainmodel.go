@@ -1,8 +1,9 @@
 package mainBuildModel
 
 import (
-	buildConfig "github.com/igloo1505/ulldCli/internal/build/config"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
+	buildConfig "github.com/Uh-little-less-dum/go-utils/pkg/config"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	choose_wait_or_pick_config_loc "github.com/igloo1505/ulldCli/internal/build/ui/chooseWaitOrPickConfigLoc"
 	clone_template_app "github.com/igloo1505/ulldCli/internal/build/ui/cloneTemplateApp"
 	confirm_config_dir_loc "github.com/igloo1505/ulldCli/internal/build/ui/confirmConfigDirLoc"
@@ -10,9 +11,9 @@ import (
 	"github.com/igloo1505/ulldCli/internal/build/ui/filepicker"
 	general_confirm "github.com/igloo1505/ulldCli/internal/build/ui/generalConfirm"
 	general_select_with_desc "github.com/igloo1505/ulldCli/internal/build/ui/generalSelectWithDesc"
+	pre_conflict_resolve_build_stream "github.com/igloo1505/ulldCli/internal/build/ui/preConflictResolveBuild"
 	stage_gather_config_location "github.com/igloo1505/ulldCli/internal/buildScript/stages/gather_config_location"
 	"github.com/igloo1505/ulldCli/internal/keymap"
-	"github.com/igloo1505/ulldCli/internal/signals"
 	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
 	"github.com/spf13/viper"
 
@@ -24,16 +25,17 @@ import (
 )
 
 type mainModel struct {
-	stage                     constants.BuildStage
-	help                      help.Model
-	confirmDirModel           confirmdir.Model
-	targetDirModel            filepicker.Model
-	confirmConfigLocEnv       general_confirm.Model
-	cloneTemplateAppModel     clone_template_app.Model
-	chooseWaitOrPickConfigLoc general_select_with_desc.Model
-	pickConfigFile            filepicker.Model
-	targetDir                 string
-	quitting                  bool
+	stage                         build_stages.BuildStage
+	help                          help.Model
+	confirmDirModel               confirmdir.Model
+	targetDirModel                filepicker.Model
+	confirmConfigLocEnv           general_confirm.Model
+	cloneTemplateAppModel         clone_template_app.Model
+	chooseWaitOrPickConfigLoc     general_select_with_desc.Model
+	pickConfigFile                filepicker.Model
+	preConflictResolveBuildStream pre_conflict_resolve_build_stream.Model
+	targetDir                     string
+	quitting                      bool
 }
 
 func (m mainModel) Init() tea.Cmd {
@@ -80,7 +82,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			_, newStage := stage_gather_config_location.GetNextBuildStage()
 			cmd = signals.SetStage(newStage)
 		} else {
-			cmd = signals.SetStage(constants.PickTargetDirStage)
+			cmd = signals.SetStage(build_stages.PickTargetDirStage)
 		}
 		cmds = append(cmds, cmd)
 		return m, tea.Batch(cmds...)
@@ -101,14 +103,14 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case m.targetDirModel.Stage:
 		m.targetDirModel, cmd = m.targetDirModel.Update(msg)
 		cmds = append(cmds, cmd)
-	case m.cloneTemplateAppModel.Stage:
-		m.cloneTemplateAppModel, cmd = m.cloneTemplateAppModel.Update(msg)
-		cmds = append(cmds, cmd)
 	case m.confirmConfigLocEnv.Stage:
 		m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
 		cmds = append(cmds, cmd)
 	case m.cloneTemplateAppModel.Stage:
 		m.cloneTemplateAppModel, cmd = m.cloneTemplateAppModel.Update(msg)
+		cmds = append(cmds, cmd)
+	case m.preConflictResolveBuildStream.Stage:
+		m.preConflictResolveBuildStream, cmd = m.preConflictResolveBuildStream.Update(msg)
 		cmds = append(cmds, cmd)
 	case m.chooseWaitOrPickConfigLoc.Stage:
 		m.chooseWaitOrPickConfigLoc, cmd = m.chooseWaitOrPickConfigLoc.Update(msg)
@@ -132,6 +134,8 @@ func (m mainModel) View() string {
 		return m.confirmConfigLocEnv.View()
 	case m.cloneTemplateAppModel.Stage:
 		return m.cloneTemplateAppModel.View()
+	case m.preConflictResolveBuildStream.Stage:
+		return m.preConflictResolveBuildStream.View()
 	case m.chooseWaitOrPickConfigLoc.Stage:
 		return m.chooseWaitOrPickConfigLoc.View()
 	case m.pickConfigFile.Stage:
@@ -148,16 +152,17 @@ func InitialMainModel(cfg *buildConfig.BuildConfigOpts) *mainModel {
 	}
 
 	val := mainModel{
-		stage:                     cfg.InitialStage,
-		help:                      help.New(),
-		targetDirModel:            filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?", constants.PickTargetDirStage),
-		confirmDirModel:           confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
-		cloneTemplateAppModel:     clone_template_app.NewCloneTemplateAppUIModel(),
-		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(),
-		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
-		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", constants.PickConfigLoc),
-		targetDir:                 cfg.TargetDir,
-		quitting:                  false,
+		stage:                         cfg.InitialStage,
+		help:                          help.New(),
+		targetDirModel:                filepicker.NewModel(homeDir, fs_utils.DirOnlyDataType, "Where would you like to build ULLD?", build_stages.PickTargetDirStage),
+		confirmDirModel:               confirmdir.NewModel("Do you want to build ULLD in your selected directory?"),
+		cloneTemplateAppModel:         clone_template_app.NewCloneTemplateAppUIModel(),
+		preConflictResolveBuildStream: pre_conflict_resolve_build_stream.NewModel(cfg),
+		confirmConfigLocEnv:           confirm_config_dir_loc.NewModel(),
+		chooseWaitOrPickConfigLoc:     choose_wait_or_pick_config_loc.NewModel(),
+		pickConfigFile:                filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", build_stages.PickConfigLoc),
+		targetDir:                     cfg.TargetDir,
+		quitting:                      false,
 	}
 
 	return &val

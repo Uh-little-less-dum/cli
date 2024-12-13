@@ -1,8 +1,8 @@
 package general_confirm
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,14 +15,14 @@ type OnResponseFunc func(wasAccepted bool) tea.Cmd
 
 type Model struct {
 	form        *huh.Form
-	Stage       constants.BuildStage
+	Stage       build_stages.BuildStage
 	confirm     *huh.Confirm
 	Description string
 	OnResponse  OnResponseFunc
 	Value       *bool
 }
 
-func NewModel(title, desc string, onResponse OnResponseFunc, stage constants.BuildStage) Model {
+func NewModel(title, desc string, onResponse OnResponseFunc, stage build_stages.BuildStage) Model {
 	theme := cli_styles.GetHuhTheme()
 	var b bool
 	c := huh.NewConfirm().

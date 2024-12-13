@@ -5,9 +5,9 @@ import (
 	"io"
 	"os/exec"
 
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/igloo1505/ulldCli/internal/signals"
 )
 
 const viewportHeight = 8

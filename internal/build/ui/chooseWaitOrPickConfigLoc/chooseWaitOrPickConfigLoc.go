@@ -1,10 +1,10 @@
 package choose_wait_or_pick_config_loc
 
 import (
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/igloo1505/ulldCli/internal/build/constants"
 	general_select_with_desc "github.com/igloo1505/ulldCli/internal/build/ui/generalSelectWithDesc"
-	"github.com/igloo1505/ulldCli/internal/signals"
 )
 
 const (
@@ -16,11 +16,11 @@ func sendConfigLocMethod_handlePickOrWait(acceptedTitle string) tea.Cmd {
 	return func() tea.Msg {
 		if acceptedTitle == selectFileTitle {
 			return signals.SetStageMsg{
-				NewStage: constants.PickConfigLoc,
+				NewStage: build_stages.PickConfigLoc,
 			}
 		} else {
 			return signals.SetStageMsg{
-				NewStage: constants.PickConfigLoc,
+				NewStage: build_stages.PickConfigLoc,
 			}
 		}
 	}
@@ -40,6 +40,6 @@ func NewModel() general_select_with_desc.Model {
 		waitForClone,
 	}
 
-	m := general_select_with_desc.NewModel(opts, "How would you like to proceed?", sendConfigLocMethod_handlePickOrWait, constants.ChooseWaitOrPickConfigLoc)
+	m := general_select_with_desc.NewModel(opts, "How would you like to proceed?", sendConfigLocMethod_handlePickOrWait, build_stages.ChooseWaitOrPickConfigLoc)
 	return m
 }

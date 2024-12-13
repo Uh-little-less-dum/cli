@@ -1,7 +1,7 @@
 package general_select
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -69,7 +69,7 @@ const (
 
 type Model struct {
 	list          list.Model
-	Stage         constants.BuildStage
+	Stage         build_stages.BuildStage
 	keys          *listKeyMap
 	delegateKeys  *delegateKeyMap
 	state         state
@@ -170,7 +170,7 @@ func getListItems(opts []string) []list.Item {
 	return items
 }
 
-func NewModel(opts []string, title string, onAccept OnAcceptFunc, stage constants.BuildStage) Model {
+func NewModel(opts []string, title string, onAccept OnAcceptFunc, stage build_stages.BuildStage) Model {
 	items := getListItems(opts)
 	delegateKeys := newDelegateKeyMap()
 	delegate := newItemDelegate(delegateKeys, onAccept)

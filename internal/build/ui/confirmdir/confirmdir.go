@@ -1,8 +1,8 @@
 package confirmdir
 
 import (
-	"github.com/igloo1505/ulldCli/internal/build/constants"
-	"github.com/igloo1505/ulldCli/internal/signals"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
 	"github.com/spf13/viper"
 
@@ -12,7 +12,7 @@ import (
 
 type Model struct {
 	form    *huh.Form
-	Stage   constants.BuildStage
+	Stage   build_stages.BuildStage
 	confirm *huh.Confirm
 }
 
@@ -34,7 +34,7 @@ func NewModel(title string) Model {
 				c,
 			),
 		).WithTheme(theme),
-		Stage:   constants.ConfirmCurrentDirStage,
+		Stage:   build_stages.ConfirmCurrentDirStage,
 		confirm: c,
 	}
 }
@@ -55,7 +55,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msgType := msg.(type) {
 	case signals.SetStageMsg:
-		if msgType.NewStage == constants.ConfirmCurrentDirStage {
+		if msgType.NewStage == build_stages.ConfirmCurrentDirStage {
 			cmds = append(cmds, m.confirm.Focus())
 		} else {
 			cmds = append(cmds, m.confirm.Blur())

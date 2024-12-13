@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/igloo1505/ulldCli/internal/build/constants"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	stage_gather_config_location "github.com/igloo1505/ulldCli/internal/buildScript/stages/gather_config_location"
 	"github.com/igloo1505/ulldCli/internal/mocks"
 	_ "github.com/igloo1505/ulldCli/internal/mocks"
@@ -16,7 +16,7 @@ func Test_GetNextBuildStage(t *testing.T) {
 	mocks.MockCommandSetup(cli_config.BuildCmdName)
 	t.Run("Finds file according to environment variable", func(t *testing.T) {
 		configPath, stage := stage_gather_config_location.GetNextBuildStage()
-		if (configPath == "") || (stage != constants.ConfirmConfigLocFromEnv) {
+		if (configPath == "") || (stage != build_stages.ConfirmConfigLocFromEnv) {
 			t.Fail()
 		}
 	})
@@ -24,7 +24,7 @@ func Test_GetNextBuildStage(t *testing.T) {
 	t.Run("Returns as if not found with env variable but no file", func(t *testing.T) {
 		os.Setenv("ULLD_ADDITIONAL_SOURCES", "~/Desktop/test")
 		configPath, stage := stage_gather_config_location.GetNextBuildStage()
-		if (configPath != "") || (stage != constants.ChooseWaitOrPickConfigLoc) {
+		if (configPath != "") || (stage != build_stages.ChooseWaitOrPickConfigLoc) {
 			t.Fail()
 		}
 	})
@@ -32,7 +32,7 @@ func Test_GetNextBuildStage(t *testing.T) {
 	t.Run("Returns as if not found with no env variable", func(t *testing.T) {
 		os.Setenv("ULLD_ADDITIONAL_SOURCES", "")
 		configPath, stage := stage_gather_config_location.GetNextBuildStage()
-		if (configPath != "") || (stage != constants.ChooseWaitOrPickConfigLoc) {
+		if (configPath != "") || (stage != build_stages.ChooseWaitOrPickConfigLoc) {
 			t.Fail()
 		}
 	})
