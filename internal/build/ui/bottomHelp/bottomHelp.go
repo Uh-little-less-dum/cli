@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	keyMap "github.com/igloo1505/ulldCli/internal/build/keymap"
+	keyMap "github.com/Uh-little-less-dum/cli/internal/build/keymap"
 )
 
 type Model struct {

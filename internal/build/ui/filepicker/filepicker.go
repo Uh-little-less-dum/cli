@@ -5,8 +5,8 @@ import (
 
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
-	fs_utils "github.com/igloo1505/ulldCli/internal/utils/fs"
+	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
+	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"

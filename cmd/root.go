@@ -1,13 +1,10 @@
 /*
-Copyright © 2024 Anderw Mueller <aiglinski414@gmail.com>
+Copyright © 2024 Andrew Mueller <aiglinski414@gmail.com>
 */
 package cmd
 
 import (
 	"os"
-
-	command_setup "github.com/igloo1505/ulldCli/internal/utils/commandSetup"
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
 
 	"github.com/spf13/cobra"
 )
@@ -33,5 +30,5 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(command_setup.InitializeCommand(RootCmd, cli_config.RootCmdName, ""))
+	// command_setup.InitializeCommand(RootCmd, cli_config.RootCmdName, "")()
 }

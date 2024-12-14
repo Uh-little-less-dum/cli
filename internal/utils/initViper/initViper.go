@@ -4,6 +4,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/Uh-little-less-dum/cli/internal/cmd_option"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/charmbracelet/log"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -75,7 +77,7 @@ func (v *ViperWrapper) readConfig() {
 	if cfgFile != "" {
 		dirPath := path.Dir(cfgFile)
 		if dirPath != "" {
-			v.viper.Set("configDir", dirPath)
+			v.viper.Set(string(viper_keys.ConfigDir), dirPath)
 		}
 	}
 }
@@ -93,23 +95,17 @@ func (v *ViperWrapper) setConfigDefaults() {
 }
 
 // Sets all cobra flags and binds them to viper.
-func (v *ViperWrapper) setFlags(cmd *cobra.Command) {
-	// Log File
-	cmd.Flags().StringP("logFile", "l", "", "Log output to this file. Useful for build failures and other local development.")
-	err := v.viper.BindPFlag("logFile", cmd.Flags().Lookup("logFile"))
-	handleErr(err)
-
-	// Log Level
-	cmd.Flags().String("logLevel", "info", "Log level")
-	err = v.viper.BindEnv("logLevel", "ULLD_LOG_LEVEL")
-	handleErr(err)
-	err = v.viper.BindPFlag("logLevel", cmd.Flags().Lookup("logLevel"))
-	handleErr(err)
+func (v *ViperWrapper) setFlags(cmd *cobra.Command, cmdOptions []cmd_option.CmdOption) {
+	for _, o := range cmdOptions {
+		o.Init(cmd, v.viper)
+	}
 }
 
 func (v *ViperWrapper) applyLogLevel() {
 
-	llString := v.viper.GetString("logLevel")
+	// llString := cmp.Or(v.viper.GetString(string(viper_keys.LogLevel)), "info")
+
+	llString := v.viper.GetString(string(viper_keys.LogLevel))
 
 	if llString != "" {
 		parsedLevel, err := log.ParseLevel(llString)
@@ -121,34 +117,23 @@ func (v *ViperWrapper) applyLogLevel() {
 	}
 }
 
-func (v *ViperWrapper) Init(cmd *cobra.Command) {
+func (v *ViperWrapper) Init(cmd *cobra.Command, opts []cmd_option.CmdOption) {
 	v.viper = viper.GetViper()
 
 	v.setConfigDefaults()
 	v.setConfigPaths(cmd)
 
 	v.viper.AutomaticEnv()
-	v.setFlags(cmd)
+	v.setFlags(cmd, opts)
 
 	v.readConfig()
 
 	v.applyLogLevel()
 }
 
-func (v *ViperWrapper) InitBuildCmd(cmd *cobra.Command) {
-	v.viper.SetDefault("timeout", 30)
-	cmd.Flags().Int("timeout", 30, "Log level")
-	err := v.viper.BindPFlag("timeout", cmd.Flags().Lookup("timeout"))
-	handleErr(err)
-}
-
-func InitViper(cmd *cobra.Command, buildName CommandName) func() {
+func InitViper(cmd *cobra.Command, cmdOpts []cmd_option.CmdOption) func() {
 	return func() {
 		var v = ViperWrapper{}
-		v.Init(cmd)
-		switch buildName {
-		case BuildCmdName:
-			v.InitBuildCmd(cmd)
-		}
+		v.Init(cmd, cmdOpts)
 	}
 }

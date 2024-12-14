@@ -1,21 +1,25 @@
-package stage_gather_config_location
+package build_stage_utils
 
 import (
 	"path/filepath"
 
+	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
+	fs_utils "github.com/Uh-little-less-dum/build/pkg/fs"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
-	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
+	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/spf13/viper"
 )
 
-// Should be called just before cloning the app to ensure that a config file can be located.
 func GetNextBuildStage() (configPath string, stage build_stages.BuildStage) {
 	v := viper.GetViper()
-	configDir := v.GetString("configDir")
+	configDir := v.GetString(string(viper_keys.ConfigDir))
+	b := build_config.GetBuildManager()
 	if configDir != "" {
 		configPath := filepath.Join(configDir, "appConfig.ulld.json")
 		if fs_utils.Exists(configPath) {
-			v.Set("appConfigPath", configPath)
+			if b.ConfigDirPath == "" {
+				b.ConfigDirPath = configPath
+			}
 			return configPath, build_stages.ConfirmConfigLocFromEnv
 		} else {
 			return "", build_stages.ChooseWaitOrPickConfigLoc

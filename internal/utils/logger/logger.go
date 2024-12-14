@@ -3,7 +3,7 @@ package logger
 import (
 	"time"
 
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -64,10 +64,9 @@ func setStructuredLogger() {
 	}
 }
 
-func InitLogger(prefix string) {
+func InitLogger() {
 	// logger := log.New(os.Stderr)
 	log.SetTimeFormat(time.Kitchen)
-	log.SetPrefix(prefix)
 	ll := viper.Get("logLevel")
 	if ll != nil {
 		logLevel := ll.(log.Level)

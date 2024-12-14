@@ -8,3 +8,4 @@ dev.log
 .env.zsh
 ulldCli
 notes
+messageLog*

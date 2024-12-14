@@ -1,4 +1,4 @@
-module github.com/igloo1505/ulldCli
+module github.com/Uh-little-less-dum/cli
 
 go 1.22.0
 

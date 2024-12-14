@@ -4,7 +4,7 @@ import (
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	tea "github.com/charmbracelet/bubbletea"
-	general_select_with_desc "github.com/igloo1505/ulldCli/internal/build/ui/generalSelectWithDesc"
+	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
 )
 
 const (

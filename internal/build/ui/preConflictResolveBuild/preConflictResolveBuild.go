@@ -1,25 +1,21 @@
 package pre_conflict_resolve_build_stream
 
 import (
-	"github.com/Uh-little-less-dum/build/pkg/sub_stage"
-	build_config "github.com/Uh-little-less-dum/go-utils/pkg/config"
+	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
+	stage_pre_conflict_resolve_build "github.com/Uh-little-less-dum/build/pkg/buildScript/stages/pre_conflict_resolve_build"
+	sub_command_build_stream "github.com/Uh-little-less-dum/cli/internal/build/ui/subCommandBuildStream"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
-	run_status "github.com/Uh-little-less-dum/go-utils/pkg/constants/runStatus"
 	stream_ids "github.com/Uh-little-less-dum/go-utils/pkg/constants/streamIds"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
-	sub_command_build_stream "github.com/igloo1505/ulldCli/internal/build/ui/subCommandBuildStream"
-	"github.com/spf13/viper"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/log"
 )
 
 type Model struct {
 	Stage       build_stages.BuildStage
 	streamModel sub_command_build_stream.Model
-	status      run_status.RunStatus
-	cfg         *build_config.BuildConfigOpts
+	cfg         *build_config.BuildManager
 }
 
 type keymap struct {
@@ -33,16 +29,11 @@ var Keymap = keymap{
 	),
 }
 
-func getSubStages() []*sub_stage.SubStage {
-	data := []*sub_stage.SubStage{}
-	return data
-}
-
-func NewModel(cfg *build_config.BuildConfigOpts) Model {
+func NewModel(cfg *build_config.BuildManager) Model {
 	return Model{
 		cfg:         cfg,
 		Stage:       build_stages.PreConflictResolveBuild,
-		streamModel: sub_command_build_stream.NewModel(stream_ids.PreConflictResolve, build_stages.ConfirmWaitForConfigMove, getSubStages()),
+		streamModel: sub_command_build_stream.NewModel(stream_ids.PreConflictResolve, build_stages.End_BuildSuccess, stage_pre_conflict_resolve_build.GetSubStageTree()),
 	}
 }
 
@@ -51,14 +42,14 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.streamModel, cmd = m.streamModel.Update(msg)
+	cmds := []tea.Cmd{cmd}
 	switch msg := msg.(type) {
 	case signals.SetStageMsg:
-		if (run_status.HasNotRun(m.status)) && (msg.NewStage == m.Stage) {
-			targetDir := viper.GetViper().GetString("targetDir")
-			if targetDir == "" {
-				log.Fatal("Attempted to build ULLD in an invalid location.")
-			}
-			m.status = run_status.Running
+		if (m.streamModel.HasNotRun()) && (msg.NewStage == m.Stage) {
+			// m.streamModel, cmd = m.streamModel.Run()
+			cmds = append(cmds, signals.SendRunSubCommandStreamMsg(m.streamModel.StreamId))
 		}
 	case tea.KeyMsg:
 		switch {
@@ -67,12 +58,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			return m, quitMsg
 		}
 	}
-	return m, nil
-}
-
-func (m Model) beginPreConflictResolveBuild(targetDir string) {
-	log.Fatal("Removed this stage wrapper. Implement the build_sub_stage stream model here.")
-	// stage_pre_conflict_resolve_build.PreConflictResolveBuild(targetDir)
+	return m, tea.Batch(cmds...)
 }
 
 func (m Model) View() string {

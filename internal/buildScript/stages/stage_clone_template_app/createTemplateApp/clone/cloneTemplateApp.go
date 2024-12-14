@@ -3,7 +3,7 @@ package stage_clone_template_app
 import (
 	"io"
 
-	git_manager "github.com/igloo1505/ulldCli/internal/build/gitManager"
+	git_manager "github.com/Uh-little-less-dum/cli/internal/build/gitManager"
 )
 
 func Run(targetDir string, outputManager io.Writer) {

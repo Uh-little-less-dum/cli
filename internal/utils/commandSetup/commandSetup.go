@@ -1,13 +1,14 @@
 package command_setup
 
 import (
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
-	"github.com/igloo1505/ulldCli/internal/utils/logger"
+	"github.com/Uh-little-less-dum/cli/internal/cmd_option"
+	cli_config "github.com/Uh-little-less-dum/cli/internal/utils/initViper"
+	"github.com/Uh-little-less-dum/cli/internal/utils/logger"
 
 	"github.com/spf13/cobra"
 )
 
-func InitializeCommand(cmd *cobra.Command, commandName cli_config.CommandName, loggerPrefix string) func() {
-	logger.InitLogger(loggerPrefix)
-	return cli_config.InitViper(cmd, commandName)
+func InitializeCommand(cmd *cobra.Command, cmdOpts []cmd_option.CmdOption) func() {
+	logger.InitLogger()
+	return cli_config.InitViper(cmd, cmdOpts)
 }

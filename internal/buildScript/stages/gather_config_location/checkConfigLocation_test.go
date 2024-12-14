@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
-	stage_gather_config_location "github.com/igloo1505/ulldCli/internal/buildScript/stages/gather_config_location"
-	"github.com/igloo1505/ulldCli/internal/mocks"
-	_ "github.com/igloo1505/ulldCli/internal/mocks"
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
+	stage_gather_config_location "github.com/Uh-little-less-dum/cli/internal/buildScript/stages/gather_config_location"
+	"github.com/Uh-little-less-dum/cli/internal/mocks"
+	_ "github.com/Uh-little-less-dum/cli/internal/mocks"
+	cli_config "github.com/Uh-little-less-dum/cli/internal/utils/initViper"
 )
 
 func Test_GetNextBuildStage(t *testing.T) {

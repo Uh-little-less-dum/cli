@@ -1,10 +1,11 @@
 package cli_config
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
+	viper_keys "github.com/Uh-little-less-dum/cli/internal/build/constants/viperKeys"
+	cmd_options "github.com/Uh-little-less-dum/cli/internal/cmdOptions"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +34,7 @@ func Test_InitViperLogLevel(t *testing.T) {
 		{"logLevel set properly from environment", "warn"},
 	}
 	cmd := TestCmd
-	InitViper(cmd, BuildCmdName)()
+	InitViper(cmd, cmd_options.GetBuildCommandOptions())()
 	for _, tt := range vals {
 		os.Setenv("ULLD_LOG_LEVEL", tt.inputVal)
 		t.Run(tt.name, func(t *testing.T) {
@@ -41,7 +42,7 @@ func Test_InitViperLogLevel(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			value := viper.GetViper().GetString("logLevel")
+			value := viper.GetViper().GetString(string(viper_keys.LogLevel))
 			es := expected.String()
 			if es == "" {
 				t.Error("Expected returned an empty string")
@@ -71,7 +72,7 @@ func Test_InitViperAdditionalSources(t *testing.T) {
 		cmd.ResetFlags()
 		viper.Reset()
 		os.Setenv("ULLD_ADDITIONAL_SOURCES", tt.inputVal)
-		InitViper(cmd, BuildCmdName)()
+		InitViper(cmd, cmd_options.GetBuildCommandOptions())()
 		t.Run(tt.name, func(t *testing.T) {
 			value := viper.GetViper().GetString("configDir")
 			if value != tt.inputVal {
@@ -83,50 +84,35 @@ func Test_InitViperAdditionalSources(t *testing.T) {
 
 type TestItem struct {
 	name     string
-	viperKey string
+	viperKey viper_keys.ViperKey
 	flagKey  string
-	inputVal string
+	inputVal any
+	asType   string // 'string' | 'int'
 }
 
 func Test_Flags(t *testing.T) {
 	var vals = []TestItem{
-		{"logFile", "logFile", "logFile", "/Users/bigsexy/Desktop/current/ulld/buildUtils/testLog.log"},
-		{"timeout", "timeout", "timeout", "30"},
+		{"logFile", viper_keys.LogFilePath, "logFile", "/Users/bigsexy/Desktop/current/ulld/buildUtils/testLog.log", "string"},
+		{"timeout", viper_keys.CloneTimeout, "timeout", 30, "int"},
 	}
 	cmd := TestCmd
 	for _, tt := range vals {
 		viper.Reset()
 		cmd.ResetFlags()
-		InitViper(cmd, BuildCmdName)()
-		err := cmd.Flags().Set(tt.flagKey, tt.inputVal)
+		InitViper(cmd, cmd_options.GetBuildCommandOptions())()
+		var err error
+		if tt.asType == "int" {
+			err = cmd.Flags().Set(tt.flagKey, string(tt.inputVal.(int)))
+		} else {
+			err = cmd.Flags().Set(tt.flagKey, string(tt.inputVal.(string)))
+		}
 		if err != nil {
 			t.Fatal(err)
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			val := viper.GetViper().GetString(tt.viperKey)
+			val := viper.GetViper().Get(string(tt.viperKey))
 			if val != tt.inputVal {
-				t.Errorf("Expected %s, Received %s", tt.inputVal, val)
-			}
-		})
-	}
-}
-
-func Test_ViperDefaults(t *testing.T) {
-	var vals = []struct {
-		viperKey string
-		expected any
-	}{
-		{"timeout", 30},
-	}
-	cmd := TestCmd
-	for _, tt := range vals {
-		viper.Reset()
-		cmd.ResetFlags()
-		InitViper(cmd, BuildCmdName)()
-		t.Run(fmt.Sprintf("Default value for %s", tt.viperKey), func(t *testing.T) {
-			val := viper.GetViper().Get(tt.viperKey)
-			if val != tt.expected {
-				t.Errorf("Expected %s, Received %v", tt.expected, val)
+				t.Errorf("Expected %s, Received %v", tt.inputVal, val)
 			}
 		})
 	}

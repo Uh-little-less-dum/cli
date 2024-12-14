@@ -2,7 +2,7 @@ package general_select_with_desc
 
 import (
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
-	cli_styles "github.com/igloo1505/ulldCli/internal/styles"
+	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"

@@ -1,8 +1,8 @@
 package mocks
 
 import (
-	command_setup "github.com/igloo1505/ulldCli/internal/utils/commandSetup"
-	cli_config "github.com/igloo1505/ulldCli/internal/utils/initViper"
+	command_setup "github.com/Uh-little-less-dum/cli/internal/utils/commandSetup"
+	cli_config "github.com/Uh-little-less-dum/cli/internal/utils/initViper"
 )
 
 func MockCommandSetup(cmdName cli_config.CommandName) {
