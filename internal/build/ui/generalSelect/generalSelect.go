@@ -1,8 +1,8 @@
 package general_select
 
 import (
-	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -80,33 +80,6 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-type SetNewDirMessage struct {
-	err    error
-	NewDir string
-}
-
-func SetNewFilePickerDir(newDir string) tea.Cmd {
-	return func() tea.Msg {
-		return SetNewDirMessage{
-			err:    nil,
-			NewDir: newDir,
-		}
-	}
-}
-
-type SetParentDirMessage struct {
-	err    error
-	NewDir string
-}
-
-func SetParentDir() tea.Cmd {
-	return func() tea.Msg {
-		return SetParentDirMessage{
-			err: nil,
-		}
-	}
-}
-
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
@@ -162,6 +135,14 @@ func (m Model) View() string {
 	return appStyle.Render(res)
 }
 
+func (m *Model) SetShowStatus(shouldShow bool) {
+	m.list.SetShowStatusBar(shouldShow)
+}
+
+func (m *Model) SetAllowFilter(shouldAllow bool) {
+	m.list.SetFilteringEnabled(shouldAllow)
+}
+
 func getListItems(opts []string) []list.Item {
 	var items []list.Item
 	for _, s := range opts {
@@ -175,7 +156,6 @@ func NewModel(opts []string, title string, onAccept OnAcceptFunc, stage build_st
 	delegateKeys := newDelegateKeyMap()
 	delegate := newItemDelegate(delegateKeys, onAccept)
 	delegate.Styles.SelectedTitle = selectedTitleStyle
-	delegate.Styles.SelectedDesc = selectedTitleStyle.Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"})
 
 	listKeys := newListKeyMap()
 
@@ -191,6 +171,7 @@ func NewModel(opts []string, title string, onAccept OnAcceptFunc, stage build_st
 			listKeys.toggleHelpMenu,
 		}
 	}
+
 	return Model{
 		list:         list,
 		keys:         listKeys,

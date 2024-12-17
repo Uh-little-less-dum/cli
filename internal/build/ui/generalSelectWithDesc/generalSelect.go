@@ -1,8 +1,8 @@
 package general_select_with_desc
 
 import (
-	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -93,33 +93,6 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-type SetNewDirMessage struct {
-	err    error
-	NewDir string
-}
-
-func SetNewFilePickerDir(newDir string) tea.Cmd {
-	return func() tea.Msg {
-		return SetNewDirMessage{
-			err:    nil,
-			NewDir: newDir,
-		}
-	}
-}
-
-type SetParentDirMessage struct {
-	err    error
-	NewDir string
-}
-
-func SetParentDir() tea.Cmd {
-	return func() tea.Msg {
-		return SetParentDirMessage{
-			err: nil,
-		}
-	}
-}
-
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
@@ -158,10 +131,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.toggleHelpMenu):
 			m.list.SetShowHelp(!m.list.ShowHelp())
 			return m, nil
-			// case key.Matches(msg, m.keys.enterItem):
-			// 	newItem := m.list.SelectedItem().FilterValue()
-			// 	cmd := SetNewFilePickerDir(newItem)
-			// 	return m, cmd
 		}
 	}
 
@@ -177,6 +146,14 @@ func (m Model) View() string {
 		return "initializing..."
 	}
 	return appStyle.Render(res)
+}
+
+func (m *Model) SetShowStatus(shouldShow bool) {
+	m.list.SetShowStatusBar(shouldShow)
+}
+
+func (m *Model) SetAllowFilter(shouldAllow bool) {
+	m.list.SetFilteringEnabled(shouldAllow)
 }
 
 func getListItems(opts []Item) []list.Item {

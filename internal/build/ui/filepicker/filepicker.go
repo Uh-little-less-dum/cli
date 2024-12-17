@@ -3,10 +3,10 @@ package filepicker
 import (
 	"path"
 
-	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
-	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	cli_styles "github.com/Uh-little-less-dum/cli/internal/styles"
 	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
+	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
+	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -242,6 +242,7 @@ func NewModel(initialDir string, dataType fs_utils.FilePickerDataType, title str
 	list.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			listKeys.enterItem,
+			listKeys.goToParent,
 			listKeys.toggleSpinner,
 			listKeys.toggleTitleBar,
 			listKeys.toggleStatusBar,

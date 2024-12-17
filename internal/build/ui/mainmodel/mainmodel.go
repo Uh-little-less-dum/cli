@@ -10,12 +10,14 @@ import (
 	"github.com/Uh-little-less-dum/cli/internal/build/ui/confirmdir"
 	"github.com/Uh-little-less-dum/cli/internal/build/ui/filepicker"
 	general_confirm "github.com/Uh-little-less-dum/cli/internal/build/ui/generalConfirm"
+	general_select "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelect"
 	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
+	package_manager_select "github.com/Uh-little-less-dum/cli/internal/build/ui/packageManagerSelect"
 	pre_conflict_resolve_build_stream "github.com/Uh-little-less-dum/cli/internal/build/ui/preConflictResolveBuild"
+	resolve_plugin_conflicts "github.com/Uh-little-less-dum/cli/internal/build/ui/resolvePluginConflicts"
 	build_stage_utils "github.com/Uh-little-less-dum/cli/internal/buildStageManagement"
 	"github.com/Uh-little-less-dum/cli/internal/keymap"
 	fs_utils "github.com/Uh-little-less-dum/cli/internal/utils/fs"
-	charm_debug "github.com/Uh-little-less-dum/go-utils/pkg/charm/logMessages"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
@@ -36,29 +38,30 @@ type mainModel struct {
 	cloneTemplateAppModel     clone_template_app.Model
 	chooseWaitOrPickConfigLoc general_select_with_desc.Model
 	pickConfigFile            filepicker.Model
+	selectPackageManager      general_select.Model
 	preConflictResolveStream  pre_conflict_resolve_build_stream.Model
+	resolvePluginConflicts    resolve_plugin_conflicts.Model
 	Program                   *tea.Program
 	targetDir                 string
 	quitting                  bool
 	exitMsg                   string
-	manager                   *build_config.BuildManager
+	cfg                       *build_config.BuildManager
 }
 
 func (m mainModel) Init() tea.Cmd {
-	// FIX: Fix this once the stream model is working.
-	return tea.Batch(
-		tea.SetWindowTitle("ULLD Build"),
-		signals.SetStage(build_stages.PreConflictResolveBuild),
-	)
+	return tea.SetWindowTitle("ULLD Build")
 }
 
+// FIX: This is applying some of these models twice. It's required, kinda, because of the circular dependency, but this can almost surely be refined.
 func (m *mainModel) ApplyProgramProp(p *tea.Program) {
 	m.Program = p
+	m.cfg.Program = p
 	m.cloneTemplateAppModel.Program = p
+	// Might be able to remove this. Try again once bug is resolved.
+	m.preConflictResolveStream = pre_conflict_resolve_build_stream.NewModel(m.cfg)
 }
 
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	charm_debug.LogCharmMessages("/Users/bigsexy/Desktop/Go/projects/ulld/cli/messageLog-main.log", "Main", msg)
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -75,18 +78,22 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 		m.pickConfigFile, cmd = m.pickConfigFile.Update(msg)
 		cmds = append(cmds, cmd)
+		m.selectPackageManager, cmd = m.selectPackageManager.Update(msg)
+		cmds = append(cmds, cmd)
 	// TODO: ToPreviousStageMsg is completely untested. Need to implement the keymap in each model to make it work.
 	case signals.ToPreviousStageMsg:
-		cmd = m.manager.SendToPreviousStageMsg()
+		cmd = m.cfg.SendToPreviousStageMsg()
 		return m, cmd
 	case signals.SetStageMsg:
-		// WARN: Stages are likely still being modified elsewhere. Fix this to make sure that all modifications to the active stage flow through one function so this can be implemented reliably.
 		build_config.SetActiveStage(msg.NewStage)
-		if msg.NewStage == m.confirmConfigLocEnv.Stage {
-			m.confirmConfigLocEnv.SetDescription(m.manager.ConfigDirPath)
+		switch msg.NewStage {
+		case m.confirmConfigLocEnv.Stage:
+			m.confirmConfigLocEnv.SetDescription(m.cfg.ConfigDirPath)
 			m.confirmConfigLocEnv, cmd = m.confirmConfigLocEnv.Update(msg)
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
+		case m.resolvePluginConflicts.Stage:
+			m.resolvePluginConflicts = resolve_plugin_conflicts.NewModel(m.cfg)
 		}
 	case signals.SubCommandCompleteMsg:
 		m.preConflictResolveStream, cmd = m.preConflictResolveStream.Update(msg)
@@ -96,7 +103,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.targetDir = msg.TargetDir
 		v := viper.GetViper()
 		v.Set(string(viper_keys.TargetDirectory), msg.TargetDir)
-		build_config.GetBuildManager().TargetDir = msg.TargetDir
+		build_config.GetBuildManager().SetTargetDir(msg.TargetDir)
 		_, newStage := build_stage_utils.GetNextBuildStage()
 		cmd := signals.SetStage(newStage)
 		cmds = append(cmds, cmd)
@@ -125,7 +132,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	switch m.manager.Stage() {
+	switch m.cfg.Stage() {
 	case m.confirmDirModel.Stage:
 		m.confirmDirModel, cmd = m.confirmDirModel.Update(msg)
 		cmds = append(cmds, cmd)
@@ -144,6 +151,12 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case m.preConflictResolveStream.Stage:
 		m.preConflictResolveStream, cmd = m.preConflictResolveStream.Update(msg)
 		cmds = append(cmds, cmd)
+	case m.selectPackageManager.Stage:
+		m.selectPackageManager, cmd = m.selectPackageManager.Update(msg)
+		cmds = append(cmds, cmd)
+	case m.resolvePluginConflicts.Stage:
+		m.resolvePluginConflicts, cmd = m.resolvePluginConflicts.Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	return m, tea.Batch(cmds...)
@@ -154,7 +167,7 @@ func (m mainModel) View() string {
 	if m.quitting {
 		return fmt.Sprintf("\n%s\n\n", m.exitMsg)
 	}
-	switch m.manager.Stage() {
+	switch m.cfg.Stage() {
 	case m.confirmDirModel.Stage:
 		return m.confirmDirModel.View()
 	case m.targetDirModel.Stage:
@@ -169,6 +182,8 @@ func (m mainModel) View() string {
 		return m.pickConfigFile.View()
 	case m.preConflictResolveStream.Stage:
 		return m.preConflictResolveStream.View()
+	case m.selectPackageManager.Stage:
+		return m.selectPackageManager.View()
 	}
 	return s
 }
@@ -188,11 +203,12 @@ func InitialMainModel(cfg *build_config.BuildManager) *mainModel {
 		confirmConfigLocEnv:       confirm_config_dir_loc.NewModel(cfg),
 		chooseWaitOrPickConfigLoc: choose_wait_or_pick_config_loc.NewModel(),
 		pickConfigFile:            filepicker.NewModel(homeDir, fs_utils.FileOnlyDataType, "Select your config file.", build_stages.PickConfigLoc),
+		selectPackageManager:      package_manager_select.NewModel(),
 		preConflictResolveStream:  pre_conflict_resolve_build_stream.NewModel(cfg),
-		targetDir:                 cfg.TargetDir,
+		targetDir:                 cfg.TargetDir(),
 		quitting:                  false,
 		exitMsg:                   "No worries.",
-		manager:                   cfg,
+		cfg:                       cfg,
 	}
 
 	return &val

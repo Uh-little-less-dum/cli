@@ -6,6 +6,7 @@ import (
 
 	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
 	"github.com/Uh-little-less-dum/build/pkg/sub_stage"
+	charm_debug "github.com/Uh-little-less-dum/go-utils/pkg/charm/logMessages"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	run_status "github.com/Uh-little-less-dum/go-utils/pkg/constants/runStatus"
 	stream_ids "github.com/Uh-little-less-dum/go-utils/pkg/constants/streamIds"
@@ -22,6 +23,7 @@ type Model struct {
 	width     int
 	height    int
 	spinner   spinner.Model
+	sub       chan bool
 	progress  progress.Model
 	StreamId  stream_ids.StreamId
 	Status    run_status.RunStatus
@@ -33,27 +35,16 @@ var (
 	doneStyle = lipgloss.NewStyle().Margin(1, 2)
 )
 
-func NewModel(streamId stream_ids.StreamId, nextStage build_stages.BuildStage, subCommands []*sub_stage.SubStage) Model {
-	p := progress.New(
-		progress.WithDefaultGradient(),
-		progress.WithWidth(40),
-		progress.WithoutPercentage(),
-	)
-	s := spinner.New()
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
-	return Model{
-		subStages: subCommands,
-		spinner:   s,
-		progress:  p,
-		Status:    run_status.NotStarted,
-		index:     0,
-		nextStage: nextStage,
-		cfg:       build_config.GetBuildManager(),
-	}
-}
-
 func (m Model) Init() tea.Cmd {
 	return nil
+}
+
+type responseMsg bool
+
+func (m Model) waitForActivity() tea.Cmd {
+	return func() tea.Msg {
+		return responseMsg(<-m.sub)
+	}
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -65,51 +56,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		case "ctrl+c", "esc", "q":
 			return m, tea.Quit
 		}
-	case sub_stage.InstalledPkgMsg:
-		pkg := m.subStages[m.index]
-		cm := lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
-		if m.index >= len(m.subStages)-1 {
-			// Everything's been installed. We're done!
-			m.Status = run_status.Complete
-			return m, tea.Sequence(
-				tea.Printf("%s %s", cm, pkg.Name), // print the last success message
-				tea.Quit,                          // exit the program
-			)
-		}
-
-		// Update progress bar
-		m.index++
-		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.subStages)))
-
-		return m, tea.Batch(
-			progressCmd,
-			tea.Printf("%s %s", cm, pkg.Name), // print success message above our program
-			sub_stage.DownloadAndInstall(m.subStages[m.index]), // download the next package
-		)
+	case sub_stage.SuccessfulSubCmdMsg:
+		return m.NextSubStageCmd()
 	case signals.RunSubCommandStreamMsg:
 		if msg.StreamId == m.StreamId {
 			return m.Run()
 		}
 	case signals.SubCommandCompleteMsg:
-		c := m.subStages[m.index]
-		if m.index >= len(m.subStages)-1 {
-			// Everything's been installed. We're done!
-			m.Status = run_status.Complete
-			return m, tea.Sequence(
-				tea.Println(c.CompleteUserMessage()), // print the last success message
-				m.OnComplete(),
-			)
-		}
-
-		// Update progress bar
-		m.index++
-		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.subStages)))
-
-		return m, tea.Batch(
-			progressCmd,
-			tea.Printf("%s", c.CompleteUserMessage()), // print success message above our program
-			m.runSubCommand(m.subStages[m.index]),     // download the next package
-		)
+		return m.NextSubStageCmd()
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -120,8 +74,37 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.progress = newModel
 		}
 		return m, cmd
+	case responseMsg:
+		if msg {
+			return m.NextSubStageCmd()
+		}
 	}
 	return m, nil
+}
+
+func (m *Model) NextSubStageCmd() (Model, tea.Cmd) {
+	pkg := m.subStages[m.index]
+	cm := lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
+
+	charm_debug.LogString("", "NextSubStageCmd", fmt.Sprintf("Index: %d, Total: %d", m.index, len(m.subStages)-1))
+	if m.index >= len(m.subStages)-1 {
+		// Everything's been installed. We're done!
+		m.Status = run_status.Complete
+		return *m, tea.Sequence(
+			tea.Printf("%s %s", cm, pkg.Name), // print the last success message
+			signals.SetStage(m.nextStage),     // exit the program
+		)
+	}
+
+	// Update progress bar
+	m.index++
+	progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.subStages)))
+
+	return *m, tea.Batch(
+		progressCmd,
+		tea.Printf("%s %s", cm, pkg.Name), // print success message above our program
+		sub_stage.RunSubCommand(m.subStages[m.index], m.cfg, m.StreamId, tea.Batch(m.spinner.Tick, m.waitForActivity())), // download the next package
+	)
 }
 
 func (m Model) OnComplete() tea.Cmd {
@@ -156,7 +139,25 @@ func (m Model) View() string {
 	return spin + info + gap + prog + pkgCount
 }
 
+func (m *Model) concurrentGroupOfIndex(idx int) []*sub_stage.SubStage {
+	var res []*sub_stage.SubStage
+	for _, l := range m.subStages {
+		if l.InConcurrentGroup(idx) {
+			res = append(res, l)
+		}
+	}
+	return res
+}
+
 func (m *Model) runSubCommand(subCommand *sub_stage.SubStage) tea.Cmd {
+	if subCommand.HasRan() {
+		return subCommand.CompleteMsg(m.StreamId)
+	}
+	concurrentIndex, hasIndex := subCommand.ConcurrentIndex()
+	if hasIndex {
+		concurrentGroup := m.concurrentGroupOfIndex(concurrentIndex)
+		sub_stage.RunConcurrently(concurrentGroup, m.cfg, m.StreamId, m.waitForActivity())
+	}
 	return subCommand.Run(m.cfg, m.StreamId)
 }
 
@@ -169,4 +170,28 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func NewModel(streamId stream_ids.StreamId, nextStage build_stages.BuildStage, cfg *build_config.BuildManager, subCommandFn sub_stage.GetSubStageFunc) Model {
+	p := progress.New(
+		progress.WithDefaultGradient(),
+		progress.WithWidth(40),
+		progress.WithoutPercentage(),
+	)
+	s := spinner.New()
+	subCommands := subCommandFn(cfg.Program)
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
+	sub := make(chan bool, len(subCommands))
+
+	return Model{
+		subStages: subCommands,
+		spinner:   s,
+		progress:  p,
+		Status:    run_status.NotStarted,
+		index:     0,
+		nextStage: nextStage,
+		cfg:       cfg,
+		StreamId:  streamId,
+		sub:       sub,
+	}
 }

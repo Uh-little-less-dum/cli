@@ -1,6 +1,8 @@
-package confirmdir
+package resolve_plugin_conflicts
 
 import (
+	"fmt"
+
 	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
@@ -11,37 +13,41 @@ import (
 )
 
 type Model struct {
-	form    *huh.Form
-	Stage   build_stages.BuildStage
-	confirm *huh.Confirm
+	form      *huh.Form
+	Stage     build_stages.BuildStage
+	nextStage build_stages.BuildStage
+	confirm   *huh.Confirm
+	cfg       *build_config.BuildManager
 }
 
 const formKey string = "useCwd"
 
-func NewModel(title string, buildManager *build_config.BuildManager) Model {
-	theme := cli_styles.GetHuhTheme()
+func NewModel(buildManager *build_config.BuildManager) Model {
 	c := huh.NewConfirm().
 		Key(formKey).
-		Title(title).
+		Title(fmt.Sprintf("We found %d conflicts.", len(buildManager.PluginConflicts()))).
 		Affirmative("Yup").
 		Negative("No")
-	t := buildManager.TargetDir()
-
-	if t != "" {
-		c.Description(t)
-	}
+	c.Description("Don't worry. Overlap is expected when using external plugins.")
 	return Model{
 		form: huh.NewForm(
 			huh.NewGroup(
 				c,
 			),
-		).WithTheme(theme),
-		Stage:   build_stages.ConfirmCurrentDirStage,
-		confirm: c,
+		).WithTheme(cli_styles.GetHuhTheme()),
+		Stage:     build_stages.ConfirmCurrentDirStage,
+		confirm:   c,
+		cfg:       buildManager,
+		nextStage: build_stages.PostConflictResolveBuild,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
+
+	if len(m.cfg.PluginConflicts()) == 0 {
+		return signals.SetStage(m.nextStage)
+	}
+
 	return m.form.Init()
 }
 
@@ -61,7 +67,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	switch msgType := msg.(type) {
 	case signals.SetStageMsg:
-		if msgType.NewStage == build_stages.ConfirmCurrentDirStage {
+		if msgType.NewStage == m.Stage {
 			cmds = append(cmds, m.confirm.Focus())
 		} else {
 			cmds = append(cmds, m.confirm.Blur())

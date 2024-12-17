@@ -18,7 +18,7 @@ var ErrStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#bd534b")).Render
 // AlertStyle provides styling for alert messages
 var AlertStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("62")).Render
 
-var UlldBlueLipgloss = lipgloss.Color(UlldBlue)
+var UlldBlueLipgloss = lipgloss.AdaptiveColor{Light: UlldBlue, Dark: UlldBlue}
 
 var TitleStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#FFFDF5")).

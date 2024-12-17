@@ -1,8 +1,6 @@
 module github.com/Uh-little-less-dum/cli
 
-go 1.22.0
-
-toolchain go1.23.2
+go 1.23.2
 
 require (
 	github.com/charmbracelet/bubbles v0.20.0
@@ -24,6 +22,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
+	github.com/approvals/go-approval-tests v0.0.0-20241211183344-15d1ffb738a9 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymanbagabas/go-udiff v0.2.0 // indirect

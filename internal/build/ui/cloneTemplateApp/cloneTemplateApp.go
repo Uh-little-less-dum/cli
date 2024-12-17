@@ -56,15 +56,6 @@ func (m Model) cloneFinishedMsg() tea.Cmd {
 	return signals.SetStage(build_stages.PreConflictResolveBuild)
 }
 
-// func listenForActivity(sub chan struct{}) tea.Cmd {
-// 	return func() tea.Msg {
-// 		for {
-// 			time.Sleep(time.Millisecond * time.Duration(rand.Int63n(900)+100)) // nolint:gosec
-// 			sub <- struct{}{}
-// 		}
-// 	}
-// }
-
 // RESUME: Come back here and handle the responseMsg. This fucking thing worked once randomly and broke again.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	s, cmd := m.spinner.Update(msg)
@@ -73,7 +64,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case signals.SetStageMsg:
 		if (m.status == NotStarted) && (msg.NewStage == m.Stage) {
-			targetDir := build_config.GetBuildManager().TargetDir
+			targetDir := build_config.GetBuildManager().TargetDir()
 			if targetDir == "" {
 				log.Fatal("Attempted to build ULLD in an invalid location.")
 			}

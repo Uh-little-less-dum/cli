@@ -1,8 +1,8 @@
-package pre_conflict_resolve_build_stream
+package post_conflict_resolve_build
 
 import (
 	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
-	stage_pre_conflict_resolve_build "github.com/Uh-little-less-dum/build/pkg/buildScript/stages/pre_conflict_resolve_build"
+	stage_post_conflict_resolve_build "github.com/Uh-little-less-dum/build/pkg/buildScript/stages/post_conflict_resolve_build"
 	sub_command_build_stream "github.com/Uh-little-less-dum/cli/internal/build/ui/subCommandBuildStream"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	stream_ids "github.com/Uh-little-less-dum/go-utils/pkg/constants/streamIds"
@@ -33,7 +33,7 @@ func NewModel(cfg *build_config.BuildManager) Model {
 	return Model{
 		cfg:         cfg,
 		Stage:       build_stages.PreConflictResolveBuild,
-		streamModel: sub_command_build_stream.NewModel(stream_ids.PreConflictResolve, build_stages.ResolvePluginConflicts, cfg, stage_pre_conflict_resolve_build.GetSubStageTree),
+		streamModel: sub_command_build_stream.NewModel(stream_ids.PostConflictResolve, build_stages.ResolvePluginConflicts, stage_post_conflict_resolve_build.GetSubStageTree()),
 	}
 }
 

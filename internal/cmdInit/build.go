@@ -20,7 +20,7 @@ func Build(args []string) *build_config.BuildManager {
 		if err != nil {
 			log.Fatal(err)
 		}
-		b.TargetDir = absPath
+		b.SetTargetDir(absPath)
 	}
 	useCwd := v.GetBool(string(viper_keys.UseCwd))
 	if (targetDir != "") && (useCwd) {

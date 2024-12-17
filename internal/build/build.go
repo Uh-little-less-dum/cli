@@ -13,7 +13,7 @@ func BuildUlld(cmd *cobra.Command, args []string) {
 	cfg.Init(args)
 	mm := build_main_model.InitialMainModel(cfg)
 	tp := tea.NewProgram(mm, tea.WithAltScreen())
-	// WARN: Might need to apply this again.
+	// WARN: Can refactor this to use the program provided to the build manager instead of providing it to the mainModel twice.
 	mm.ApplyProgramProp(tp)
 	if _, err := tp.Run(); err != nil {
 		cobra.CheckErr(err)

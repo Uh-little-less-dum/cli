@@ -3,10 +3,10 @@ package buttom_help
 import (
 	"strings"
 
+	keyMap "github.com/Uh-little-less-dum/cli/internal/build/keymap"
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	keyMap "github.com/Uh-little-less-dum/cli/internal/build/keymap"
 )
 
 type Model struct {
@@ -17,7 +17,7 @@ type Model struct {
 	quitting   bool
 }
 
-// RESUME: Come back here tomorrow first thing and implement this model, attach a KeyMap object to each model, and create a SetKeys method here to update the keys each time the active model changes.
+// TODO: Come back here and implement this model, attach a KeyMap object to each model, and create a SetKeys method here to update the keys each time the active model changes.
 func NewModel(keys keyMap.KeyMap) Model {
 	return Model{
 		keys:       keys,

@@ -1,10 +1,10 @@
 package choose_wait_or_pick_config_loc
 
 import (
+	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	tea "github.com/charmbracelet/bubbletea"
-	general_select_with_desc "github.com/Uh-little-less-dum/cli/internal/build/ui/generalSelectWithDesc"
 )
 
 const (
@@ -41,5 +41,9 @@ func NewModel() general_select_with_desc.Model {
 	}
 
 	m := general_select_with_desc.NewModel(opts, "How would you like to proceed?", sendConfigLocMethod_handlePickOrWait, build_stages.ChooseWaitOrPickConfigLoc)
+
+	m.SetShowStatus(false)
+	m.SetAllowFilter(false)
+
 	return m
 }
